@@ -78,10 +78,8 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
           <code class="dark">jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>, true); //
             true</code> - returns <code>true</code> because we passed an optional "caseInsensitive" param
         </p>
-        <hr>
 
-        <a name="endsWith"></a>
-        <h4>jii.endsWith(string, length|lastChars, caseInsensitive)</h4>
+<h4>jii.endsWith(string, length|lastChars, caseInsensitive)</h4>
         <p>
           Checks whether a strings ends with given chars
         </p>
@@ -127,10 +125,7 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
         <p>
           <code class="dark">jii.map([<span class="blue">1</span>, <span class="blue">2</span>, <span class="blue">3</span>], function(x) { return x * x; }); // [1, 4, 9]</code>
         </p>
-        <hr>
->
-        <a name="capitalize"></a>
-        <h4>jii.capitalize(string, number)</h4>
+<h4>jii.capitalize(string, number)</h4>
         <p>
           Capitalizes string. If param <code>number</code> is not given then only capitalizes first letter, otherwise
           capitalizes given number first letters.
@@ -155,17 +150,13 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
         <p>
           <code class="dark"><span class="red">'wartooth'</span>.capitalize(); // Wartooth</code>
         </p>
-        <hr>
-
-        <a name="classes"></a>
-        <h2><span class="blue">Classes</span></h2>
-        <a name="class.create"></a>
-        <h4>Class.create([optional] superClass, methods)</h4>
+<h2><span class="blue">Classes</span></h2>
+<h4>Class.create([optional] superClass, methods)</h4>
         <p>
           Creates a new class
         </p>
         <p>
-          <pre>
+```javascript
 var Animal = Class.create({
   'init': function(animal) {
     this.animal = animal;
@@ -173,5 +164,5 @@ var Animal = Class.create({
   'breath': function() {
     return this.animal + <span class="red">'is breathing'</span>;
   }
-});</pre>
-        </p>
+});
+```
