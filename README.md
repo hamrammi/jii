@@ -22,7 +22,8 @@ var animal = {
 };
 ```
 ```javascript
-jii.hasChain(animal, 'bear.fly'); // I cannot fly``` - returns value if an object has given chain of keys.
+jii.hasChain(animal, 'bear.fly'); // I cannot fly
+``` - returns value if an object has given chain of keys.
 In future you can use this value like <b>true</b> in <b>if</b> constructions:
 ```javascript
 if (jii.hasChain(animal, 'bear.fly') { ... };  else { ... }
