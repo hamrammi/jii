@@ -59,7 +59,7 @@ then two strings will be compared.<br/>
 
 <h4>jii.endsWith(string, length|lastChars, caseInsensitive)</h4>
 <p>Checks whether a strings ends with given chars</p>
-`Heads up!` Second params can be `number` or string`. If `number` then returns last N characters. If `string`
+`Heads up!` Second params can be `number` or `string`. If `number` then returns last N characters. If `string`
 then compares two strings.<br/>
 `jii.endsWith('Oblivion'); // n` - returns last char<br/>
 `jii.endsWith('Oblivion', 4); // vion` - returns a given number of end letters<br/>
@@ -80,7 +80,7 @@ Capitalizes string. If param `number` is not given then only capitalizes first l
 ```javascript
 jii.capitalize('elementary'); // Elementary
 jii.capitalize('elementary', 7); // ELEMENTary => throws error if second param is not a number
-
+```
 <h4>jii.prototype()</h4>
 Prototype native JavaScript's objects with <b>jii</b> library. After calling this method you can:
 ```javascript
