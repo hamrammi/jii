@@ -49,16 +49,16 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
 <p>Checks whether a string begins with given chars</p>
 `Heads up!` Second param can be `number` or `string`. If `number` then first N characters will be returned. If `string`
 then two strings will be compared.
-`jii.startsWith('Oblivion'); // O` => returns first char
-`jii.startsWith('Oblivion', 4); // Obli` => returns a given number of letters
+`jii.startsWith('Oblivion'); // O` => returns first char<br/>
+`jii.startsWith('Oblivion', 4); // Obli` => returns a given number of letters<br/>
 `jii.startsWith('Oblivion', '4'); // false` - returns <code>false</code> since second argument is string, not number
-<code class="dark">jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'Obli'</span>); //
+jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'Obli'</span>); //
             true</code> - returns <code>true</code>
-<code class="dark">jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'foo'</span>); //
+jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'foo'</span>); //
             false</code> - returns <code>false</code>
-<code class="dark">jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>); //
+jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>); //
             false</code> - returns <code>false</code> because case sensitive on default
-<code class="dark">jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>, true); //
+jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>, true); //
             true</code> - returns <code>true</code> because we passed an optional "caseInsensitive" param
 
 <h4>jii.endsWith(string, length|lastChars, caseInsensitive)</h4>
