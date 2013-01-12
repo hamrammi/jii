@@ -1,5 +1,5 @@
 <h1>jii - JavaScript's helpers library</h1>
-      <div class="span9">
+<div class="span9">
         <a name="baseMethods"></a>
         <h2><span class="blue">Base Methods</span></h2>
         <a name="hasChain"></a>
@@ -8,8 +8,7 @@
           Check whether given object has a chain of keys.
         </p>
         <p>
-          <pre>
-// Let's say we have the following object
+<pre>// Let's say we have the following object
 var animal = {
   bear: {
     color: 'brown',
@@ -63,10 +62,7 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
     console.log('I think that ' + res + ' in summer');
   }
 }); // Something went wrong</pre>
-        <hr>
-
-        <a name="startsWith"></a>
-        <h4>jii.startsWith(string, length|firstChars, caseInsensitive)</h4>
+<h4>jii.startsWith(string, length|firstChars, caseInsensitive)</h4>
         <p>Checks whether a string begins with given chars</p>
         <p>
           <span class="label label-info">Heads up!</span> Second param can be <code>number</code> or
@@ -197,6 +193,3 @@ var Animal = Class.create({
   }
 });</pre>
         </p>
-      </div>
-    </div>
-  </div>
