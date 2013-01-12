@@ -1,5 +1,4 @@
 <h1>jii - JavaScript's helpers library</h1>
-
       <div class="span9">
         <a name="baseMethods"></a>
         <h2><span class="blue">Base Methods</span></h2>
