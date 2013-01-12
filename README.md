@@ -1,14 +1,9 @@
 <h1>jii - JavaScript's helpers library</h1>
-<div class="span9">
-        <a name="baseMethods"></a>
-        <h2><span class="blue">Base Methods</span></h2>
-        <a name="hasChain"></a>
-        <h4>jii.hasChain(object, chain, callback)</h4>
-        <p>
-          Check whether given object has a chain of keys.
-        </p>
-        <p>
-<pre>// Let's say we have the following object
+<h2><span class="blue">Base Methods</span></h2>
+<h4>jii.hasChain(object, chain, callback)</h4>
+<p>Check whether given object has a chain of keys.</p>
+```javascript
+// Let's say we have the following object
 var animal = {
   bear: {
     color: 'brown',
@@ -24,19 +19,13 @@ var animal = {
       }
     }
   }
-};</pre>
-        </p>
-        <p>
-          <code class="dark">jii.hasChain(animal, <span class="red">'bear.fly'</span>); // I cannot fly</code> -
-          returns value if an object has given chain of keys.
-          <p><span class="label label-info">Heads up!</span>
-            In future you can use this value like <code>true</code> in <code>if</code> constructions:
-            <code class="dark">if (jii.hasChain(animal, <span class="red">'bear.fly'</span>) { ... };
-            else { ... }</code>
-          </p>
-        </p>
-        <p>
-          <code class="dark">jii.hasChain(animal, <span class="red">'bear.color.inWinter'</span>); // false</code>
+};
+
+jii.hasChain(animal, 'bear.fly'); // I cannot fly - returns value if an object has given chain of keys.
+// In future you can use this value like <b>true</b> in <b>if</b> constructions:
+if (jii.hasChain(animal, 'bear.fly') { ... };  else { ... }
+jii.hasChain(animal, 'bear.color.inWinter'); // false
+```
         </p>
         <p>
           <code class="dark">jii.hasChain(animal, <span class="red">'fox.likes.hare'</span>); //
@@ -46,8 +35,7 @@ var animal = {
           <code class="dark">jii.hasChain(animal, <span class="red">'fox.likes.hare.winter'</span>); //
             Hunting on hares</code>
         </p>
-        <pre>
-jii.hasChain(animal, <span class="red">'fox.likes.hare.summer'</span>, function(err, res) {
+<pre>jii.hasChain(animal, <span class="red">'fox.likes.hare.summer'</span>, function(err, res) {
   if (err) {
     console.log('Something went wrong');
   } else {
@@ -63,7 +51,7 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
   }
 }); // Something went wrong</pre>
 <h4>jii.startsWith(string, length|firstChars, caseInsensitive)</h4>
-        <p>Checks whether a string begins with given chars</p>
+<p>Checks whether a string begins with given chars</p>
         <p>
           <span class="label label-info">Heads up!</span> Second param can be <code>number</code> or
           <code>string</code>. If <code>number</code> then first N characters will be returned. If <code>string</code>
