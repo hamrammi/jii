@@ -1,13 +1,4 @@
-jii
-===
-
-<html>
-<body data-spy="scroll">
-  <div class="container">
-    <div class="page-header">
-      <h1 style="text-align: center;">jii - JavaScript's helpers library <small>v.0.1.2</small></h1>
-    </div>
-    <div class="row">
+<h1>jii - JavaScript's helpers library</h1>
 
       <div class="span9">
         <a name="baseMethods"></a>
@@ -210,7 +201,3 @@ var Animal = Class.create({
       </div>
     </div>
   </div>
-
-
-</body>
-</html>
