@@ -20,36 +20,32 @@ var animal = {
     }
   }
 };
-
-jii.hasChain(animal, 'bear.fly'); // I cannot fly - returns value if an object has given chain of keys.
-// In future you can use this value like <b>true</b> in <b>if</b> constructions:
-if (jii.hasChain(animal, 'bear.fly') { ... };  else { ... }
-jii.hasChain(animal, 'bear.color.inWinter'); // false
 ```
-        </p>
-        <p>
-          <code class="dark">jii.hasChain(animal, <span class="red">'fox.likes.hare'</span>); //
-          Object { winter: "Hunting on hares", summer: "chickens are better" }</code>
-        </p>
-        <p>
-          <code class="dark">jii.hasChain(animal, <span class="red">'fox.likes.hare.winter'</span>); //
-            Hunting on hares</code>
-        </p>
-<pre>jii.hasChain(animal, <span class="red">'fox.likes.hare.summer'</span>, function(err, res) {
+```javascript
+jii.hasChain(animal, 'bear.fly'); // I cannot fly``` - returns value if an object has given chain of keys.
+In future you can use this value like <b>true</b> in <b>if</b> constructions:
+```javascript
+if (jii.hasChain(animal, 'bear.fly') { ... };  else { ... }
+```
+```javascript
+jii.hasChain(animal, 'bear.color.inWinter'); // false
+jii.hasChain(animal, 'fox.likes.hare'); // Object { winter: "Hunting on hares", summer: "chickens are better" }
+jii.hasChain(animal, 'fox.likes.hare.winter'); // Hunting on hares
+jii.hasChain(animal, 'fox.likes.hare.summer', function(err, res) {
   if (err) {
     console.log('Something went wrong');
   } else {
     console.log('I think that ' + res + ' in summer');
   }
-}); // I think that chickens are better in summer</pre>
-        <pre>
+}); // I think that chickens are better in summer
 jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(err, res) {
   if (err) {
     console.log('Something went wrong');
   } else {
     console.log('I think that ' + res + ' in summer');
   }
-}); // Something went wrong</pre>
+}); // Something went wrong
+```
 <h4>jii.startsWith(string, length|firstChars, caseInsensitive)</h4>
 <p>Checks whether a string begins with given chars</p>
         <p>
