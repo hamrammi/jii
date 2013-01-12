@@ -22,10 +22,8 @@ var animal = {
 };
 ```
 ```javascript
-jii.hasChain(animal, 'bear.fly'); // I cannot fly
-``` - returns value if an object has given chain of keys.
-In future you can use this value like <b>true</b> in <b>if</b> constructions:
-```javascript
+jii.hasChain(animal, 'bear.fly'); // I cannot fly => returns value if an object has given chain of keys.
+// In future you can use this value like `true` in `if` constructions:
 if (jii.hasChain(animal, 'bear.fly') { ... };  else { ... }
 ```
 ```javascript
@@ -49,8 +47,7 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
 ```
 <h4>jii.startsWith(string, length|firstChars, caseInsensitive)</h4>
 <p>Checks whether a string begins with given chars</p>
-        <p>
-          <span class="label label-info">Heads up!</span> Second param can be <code>number</code> or
+`Heads up!` Second param can be `number` or
           <code>string</code>. If <code>number</code> then first N characters will be returned. If <code>string</code>
           then two strings will be compared.
         </p>
