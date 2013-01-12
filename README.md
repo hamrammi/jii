@@ -1,5 +1,5 @@
 <h1>jii - JavaScript's helpers library</h1>
-<h2><span class="blue">Base Methods</span></h2>
+<h2>Base Methods</h2>
 <h4>jii.hasChain(object, chain, callback)</h4>
 <p>Check whether given object has a chain of keys.</p>
 ```javascript
@@ -37,7 +37,7 @@ jii.hasChain(animal, 'fox.likes.hare.summer', function(err, res) {
     console.log('I think that ' + res + ' in summer');
   }
 }); // I think that chickens are better in summer
-jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(err, res) {
+jii.hasChain(animal, 'fox.likes.hare.autumn', function(err, res) {
   if (err) {
     console.log('Something went wrong');
   } else {
@@ -48,37 +48,26 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
 <h4>jii.startsWith(string, length|firstChars, caseInsensitive)</h4>
 <p>Checks whether a string begins with given chars</p>
 `Heads up!` Second param can be `number` or `string`. If `number` then first N characters will be returned. If `string`
-then two strings will be compared.
+then two strings will be compared.<br/>
 `jii.startsWith('Oblivion'); // O` => returns first char<br/>
 `jii.startsWith('Oblivion', 4); // Obli` => returns a given number of letters<br/>
-`jii.startsWith('Oblivion', '4'); // false` - returns <code>false</code> since second argument is string, not number
-jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'Obli'</span>); //
-            true</code> - returns <code>true</code>
-jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'foo'</span>); //
-            false</code> - returns <code>false</code>
-jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>); //
-            false</code> - returns <code>false</code> because case sensitive on default
-jii.startsWith(<span class="red">'Oblivion'</span>, <span class="red">'obli'</span>, true); //
-            true</code> - returns <code>true</code> because we passed an optional "caseInsensitive" param
+`jii.startsWith('Oblivion', '4'); // false` - returns `false` since second argument is a string, not a number<br/>
+`jii.startsWith('Oblivion', 'Obli'); // true` - returns `true`<br/>
+`jii.startsWith'Oblivion', 'foo'); // false` - returns `false`<br/>
+`jii.startsWith('Oblivion', 'obli'); // false` - returns `false` because case sensitive by default<br/>
+`jii.startsWith('Oblivion', 'obli', true); // true` - returns `true` because we passed an optional "caseInsensitive" param<br/>
 
 <h4>jii.endsWith(string, length|lastChars, caseInsensitive)</h4>
 <p>Checks whether a strings ends with given chars</p>
-`Heads up!` Second params can be `number` or
-<code>string</code>. If <code>number</code> then returns last N characters. If <code>string</code>
-          then compares two strings.
-<code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>); // n</code> - returns last char
-<code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="blue">4</span>); //
-            vion</code> - returns a given number of end letters
-<code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="red">'4'</span>); //
-            false</code> - returns <code>false</code> since second argument is string, not number
- <code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="red">'vion'</span>); //
-            true</code> - returns <code>true</code>
-<code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="red">'foo'</span>); //
-            false</code> - returns <code>false</code>
-<code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="red">'Vion'</span>); //
-            false</code> - returns <code>false</code> because case sensitive on default
-<code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="red">'Vion'</span>, true); //
-            true</code> - returns <code>true</code> because we passed an optional "caseInsensitive" param
+`Heads up!` Second params can be `number` or string`. If `number` then returns last N characters. If `string`
+then compares two strings.<br/>
+`jii.endsWith('Oblivion'); // n` - returns last char<br/>
+`jii.endsWith('Oblivion', 4); // vion` - returns a given number of end letters<br/>
+`jii.endsWith('Oblivion', '4'); // false` - returns `false` since second argument is string, not number<br/>
+`jii.endsWith('Oblivion', 'vion'); // true` - returns `true`<br/>
+`jii.endsWith('Oblivion', 'foo'); // false` - returns `false`<br/>
+`jii.endsWith('Oblivion', 'Vion'); // false` - returns `false` because case sensitive on default<br/>
+`jii.endsWith('Oblivion', 'Vion', true); // true` - returns `true` because we passed an optional "caseInsensitive" param<br/>
 
 <h4>jii.map(array, iterator, context)</h4>
 Maps each value of array with iterator function. If browser has native "map" method then calls it.
@@ -98,7 +87,7 @@ Prototype native JavaScript's objects with <b>jii</b> library. After calling thi
 'Slither'.startsWith('Slith'); // true
 'wartooth'.capitalize(); // Wartooth
 ```
-<h2><span class="blue">Classes</span></h2>
+<h2>Classes</h2>
 <h4>Class.create([optional] superClass, methods)</h4>
 Creates a new class
 ```javascript
@@ -107,7 +96,7 @@ var Animal = Class.create({
     this.animal = animal;
   },
   'breath': function() {
-    return this.animal + <span class="red">'is breathing'</span>;
+    return this.animal + 'is breathing';
   }
 });
 ```
