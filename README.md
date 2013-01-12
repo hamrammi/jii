@@ -80,7 +80,7 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
         </p>
 
 <h4>jii.endsWith(string, length|lastChars, caseInsensitive)</h4>
-        <p>
+<p>
           Checks whether a strings ends with given chars
         </p>
         <p>
@@ -115,18 +115,15 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
           <code class="dark">jii.endsWith(<span class="red">'Oblivion'</span>, <span class="red">'Vion'</span>, true); //
             true</code> - returns <code>true</code> because we passed an optional "caseInsensitive" param
         </p>
-        <hr>
-
-        <a name="map"></a>
-        <h4>jii.map(array, iterator, context)</h4>
-        <p>
+<h4>jii.map(array, iterator, context)</h4>
+<p>
           Maps each value of array with iterator function. If browser has native "map" method then calls it.
         </p>
         <p>
           <code class="dark">jii.map([<span class="blue">1</span>, <span class="blue">2</span>, <span class="blue">3</span>], function(x) { return x * x; }); // [1, 4, 9]</code>
         </p>
 <h4>jii.capitalize(string, number)</h4>
-        <p>
+<p>
           Capitalizes string. If param <code>number</code> is not given then only capitalizes first letter, otherwise
           capitalizes given number first letters.
         </p>
@@ -137,11 +134,8 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
           <code data-code="jii(<span class='red'>'elementary'</span>).capitalize(<span class='blue'>7</span>); // ELEMENTary" class="dark">jii.capitalize(<span class="red">'elementary'</span>, <span class="blue">7</span>); //
             ELEMENTary</code> - throws error if second param is not a number
         </p>
-        <hr>
-
-        <a name="prototype"></a>
-        <h4>jii.prototype()</h4>
-        <p>
+<h4>jii.prototype()</h4>
+<p>
           Prototype native JavaScript's objects with <b>jii</b> library. After calling this method you can:
         </p>
         <p>
@@ -152,7 +146,7 @@ jii.hasChain(animal, <span class="red">'fox.likes.hare.autumn'</span>, function(
         </p>
 <h2><span class="blue">Classes</span></h2>
 <h4>Class.create([optional] superClass, methods)</h4>
-        <p>
+<p>
           Creates a new class
         </p>
         <p>
