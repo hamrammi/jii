@@ -3,7 +3,7 @@
  *
  * Helper library that makes work with classes even better
  *
- * @version: 0.2.4 (last update: 12.01.2013)
+ * @version: 0.2.6 (last update: 19.01.2013)
  * @author: hamrammi@gmail.com
  */
 // TODO: private methods and variables
@@ -77,10 +77,11 @@
       Class.subclasses = [];
 
       Class.prototype.constructor = Class;
-      // TODO: если класс входит в subclasses то запретить доступ к его свойствам и методам
-      Class.prototype['super'] = function(superClass) {
-        superClass = superClass || Class.prototype.superclass;
-        return superClass.prototype;
+
+      // TODO: Should this be rewritten?
+      Class.prototype['accessor'] = function(targetClass) {
+        targetClass = targetClass || Class.prototype.superclass;
+        return targetClass.prototype;
       };
 
       // Finally, extend class with given `@param obj`
