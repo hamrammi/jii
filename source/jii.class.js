@@ -7,26 +7,19 @@
  * @author: hamrammi@gmail.com
  */
 // TODO: private methods and variables
-// TODO: think about how to implement `instanceof` check when superClass is given
 (function() {
   var root = this;
 
   root.Class = (function() {
-    var create = function() {
-      var obj = {};
-      var superClass = null;
+    var create = function(superClass, obj) {
+      obj = obj || {};
 
       // Create regular class (can be superclass)
-      if (typeof arguments[0] !== 'function' && typeof arguments[0] === 'object') {
-        obj = arguments[0];
-      }
-
-      // Create subclass
-      if (typeof arguments[0] === 'function' && typeof arguments[1] === 'object') {
-        superClass = arguments[0];
-        obj = arguments[1];
-      } else if (typeof arguments[0] === 'function' && !arguments[1]) { // var subClass = Class.create(Parent);
-        superClass = arguments[0];
+      if (typeof superClass === 'object') {
+        obj = superClass;
+        superClass = null;
+      } else if (typeof superClass !== 'function') {
+        throw new TypeError('Must be a function');
       }
 
       var Class = function() {
@@ -37,7 +30,7 @@
       // Constructor function
       Class.prototype.init = function() {};
 
-      // Reference to parent class
+      // Self-reference
       Class.prototype.superclass = Class;
 
       if (superClass) {
@@ -48,6 +41,7 @@
         // and assign it to class
         Class.prototype = new T();
 
+        // Reference to parent class
         Class.prototype.superclass = superClass;
 
         // At the moment superClass can see only one level inheritance
@@ -84,7 +78,7 @@
 
       Class.prototype.constructor = Class;
       // TODO: если класс входит в subclasses то запретить доступ к его свойствам и методам
-      Class.prototype.super = function(superClass) {
+      Class.prototype['super'] = function(superClass) {
         superClass = superClass || Class.prototype.superclass;
         return superClass.prototype;
       };
