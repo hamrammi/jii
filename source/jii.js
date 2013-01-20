@@ -3,16 +3,17 @@
  *
  * Helper library that makes work with javascript even better
  *
- * @version: 0.1.0 (last update: 30.12.2012)
+ * @version: 0.2.4 (last update: 20.01.2013)
  * @author: hamrammi@gmail.com
  */
 (function() {
-  var VERSION = '0.1.0';
+  var VERSION = '0.2.4';
   var root = this;
 
   var
     unshift       = Array.prototype.unshift,
-    slice         = Array.prototype.slice;
+    slice         = Array.prototype.slice,
+    toString      = Object.prototype.toString;
 
   // Local copy of `jii` for using below.
   var jii = function(obj, func) {
@@ -29,22 +30,51 @@
 
   jii.VERSION = VERSION;
 
-  var error = function(func, position, expected, got) {
-    return 'Function "' + func + '", ' + position + ' argument: expected "'
-      + expected + '", got "' + got + '". ';
+  // -------------------- HELPERS --------------------
+
+  var isArray = jii.isArray = function(obj) {
+    return toString.call(obj) === '[object Array]';
+  };
+  var isNumber = jii.isNumber = function(obj) {
+    return toString.call(obj) === '[object Number]';
+  };
+  var isString = jii.isString = function(obj) {
+    return toString.call(obj) === '[object String]';
+  };
+  var isObject = jii.isObject = function(obj) {
+    return toString.call(obj) === '[object Object]';
+  };
+  var isFunction = jii.isFunction = function(obj) {
+    return toString.call(obj) === '[object Function]';
+  };
+  var isBoolean = jii.isBoolean = function(obj) {
+    return toString.call(obj) === '[object Boolean]';
   };
 
-  // Capitalize string
-  jii.capitalize = function(string) {
-    var num = arguments[1] || null;
-    var transformed = [];
+  var typeError = function(expected, got) {
+    throw new TypeError('Expected "' + expected + '", but got "' + got + '".');
+  };
 
+  var validateType = function(func, arg, expected) {
+    var got = typeof arg;
+    if (got !== expected) {
+      var error = '"jii.' + func + '": expected "' + expected + '", got "' + got + '"';
+      throw new TypeError(error);
+    }
+    return arg;
+  };
+
+  // -------------------- STRINGS --------------------
+
+  // Capitalize string
+  jii.capitalize = function(string, num) {
+    string = validateType('capitalize', string, 'string');
+    num = num || null;
+    var transformed = [];
     if (!num) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     } else {
-      if (typeof num !== 'number') {
-        throw Error('Second argument must be a number');
-      }
+      num = validateType('capitalize', num, 'number');
       for (var i = 0; i < num; i++) {
         transformed[i] = string.charAt(i).toUpperCase();
       }
@@ -54,14 +84,11 @@
 
 
   // Checks whether last character of string equals to lastChar
-  jii.endsWith = function(string /*, length|lastChars, caseInsensitive*/) {
-    var length_or_lastChars = arguments[1] || null;
-    var caseInsensitive = arguments[2] || false;
+  jii.endsWith = function(string, length_or_lastChars, caseInsensitive) {
+    string = validateType('endsWith', string, 'string');
+    length_or_lastChars = length_or_lastChars || null;
+    caseInsensitive = caseInsensitive || false;
     var length = string.length;
-
-    if (typeof string !== 'string') {
-      throw Error('First argument must be a string');
-    }
 
     if (!length_or_lastChars && !caseInsensitive) {
       return string.charAt(length - 1);
@@ -72,29 +99,26 @@
       } else if (typeof length_or_lastChars === 'number') {
         return string.slice(string.length - length_or_lastChars);
       } else {
-        throw Error('Second argument must be a string or a number');
+        typeError('string or number', typeof length_or_lastChars);
       }
     } else if (length_or_lastChars && caseInsensitive) {
       if (typeof length_or_lastChars === 'number') {
-        throw Error('Second argument must be a string when using third argument');
+        typeError('string', 'number');
       } else if (typeof length_or_lastChars === 'string') {
         length = length_or_lastChars.length;
         return string.slice(string.length - length).toLowerCase() === length_or_lastChars.toLowerCase();
       } else {
-        throw Error('Second argument must be a string when using third argument');
+        typeError('string', typeof length_or_lastChars);
       }
     }
   };
 
   // Check whether first letter of string equals to firstChar
-  jii.startsWith = function(string /*, length|firstChars, caseInsensitive*/) {
-    var length_or_firstChars = arguments[1] || null;
-    var caseInsensitive = arguments[2] || false;
+  jii.startsWith = function(string, length_or_firstChars, caseInsensitive) {
+    string = validateType('startsWith', string, 'string');
+    length_or_firstChars = length_or_firstChars || null;
+    caseInsensitive = caseInsensitive || false;
     var length = 0;
-
-    if (typeof string !== 'string') {
-      throw Error('First argument must be string');
-    }
 
     if (!length_or_firstChars && !caseInsensitive) {
       return string.charAt(0);
@@ -105,44 +129,72 @@
       } else if (typeof length_or_firstChars === 'number') {
         return string.slice(0, length_or_firstChars);
       } else {
-        throw Error('Second arguments must be string or number');
+        typeError('string or number', typeof length_or_firstChars);
       }
     } else if (length_or_firstChars && caseInsensitive) {
       if (typeof length_or_firstChars === 'number') {
-        throw Error('Second argument must be string when using third argument');
+        typeError('string', 'number');
       } else if (typeof length_or_firstChars === 'string') {
         length = length_or_firstChars.length;
         return string.slice(0, length).toLowerCase() === length_or_firstChars.toLowerCase();
       } else {
-        throw Error('Second argument must be string when using third argument');
+        typeError('string', typeof length_or_firstChars);
       }
     }
   };
+
+  // Find position of character in string
+  jii.position = function(string, chr) {
+    string = validateType('position', string, 'string');
+    chr = validateType('position', chr, 'string');
+    var positions = [];
+    for (var i = 0, l = string.length; i < l; i++) {
+      if (string[i] === chr) {
+        positions.push(i);
+      }
+    }
+    return positions;
+  };
+
+
+  // -------------------- ARRAYS --------------------
 
   // Maps each value of `obj` with `iterator` function
   jii.map = function(obj, iterator, context) {
     var result = [];
     if (obj == null) return result;
-
     // Delegate to `ECMAScript 5` native `map` if available
     if (Array.prototype.map) {
       return obj.map(iterator, context);
     }
-
     for (var i = 0, l = obj.length; i < l; i++) {
       result[i] = iterator.call(context, obj[i]);
     }
-
     return result;
   };
 
-//  var sleep = jii.sleep = function(delay) {
-//    var ts = new Date().getTime();
-//    while (new Date().getTime() - ts < delay) {
-//      sleep(delay);
-//    }
-//    return true;
-//  };
+  // -------------------- MISC --------------------
+
+  // Split obj into characters and count occurrence of each one
+  jii.occurrences = function(obj, chr) {
+    chr = chr || null;
+    var type = toString.call(obj);
+    switch (type) {
+      case '[object String]': break;
+      case '[object Number]':
+        obj = '' + obj; break;
+      case '[object Array]': break;
+      default: typeError('string or number or array', typeof obj);
+    }
+    var dict = {};
+    for (var i = 0, l = obj.length; i < l; i++) {
+      dict[obj[i]] = dict[obj[i]] ? dict[obj[i]] + 1 : 1;
+    }
+    if (chr) return dict[chr];
+    return dict;
+  };
+
+  // -------------------- SYSTEM --------------------
 
   jii.chain = function() {
     W._chain = true;
@@ -160,9 +212,7 @@
   };
 
   // A `wrapper` function
-  var W = function(obj) {
-    this._w = obj;
-  };
+  var W = function(obj) { this._w = obj; };
 
   jii.prototype = W.prototype;
 
@@ -194,8 +244,8 @@
     return this;
   };
 
-  W.prototype.value = function() { return this._w };
+  W.prototype.value = function() { return this._w; };
 
   // Expose `jii` as global variable
   root.jii = jii;
-})();
+}).call(this);
