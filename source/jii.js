@@ -161,6 +161,7 @@
 
   // Maps each value of `obj` with `iterator` function
   jii.map = function(obj, iterator, context) {
+    context = context || root;
     var result = [];
     if (obj == null) return result;
     // Delegate to `ECMAScript 5` native `map` if available
@@ -171,6 +172,33 @@
       result[i] = iterator.call(context, obj[i]);
     }
     return result;
+  };
+
+  // Check whether an object has chain of properties
+  jii.hasChain = function(obj, chain, cb) {
+    // Check whether an 'obj' argument is type of 'object'
+    if (!isObject(obj)) typeError('object', typeof obj);
+    chain = validateType('hasChain', chain, 'string');
+    cb = cb || null;
+    // Keys to be evaluated
+    var keys = chain.split('.');
+    // Result object or other typed data
+    var res = obj;
+    for (var i = 0, l = keys.length; i < l; i++) {
+      res = res[keys[i]];
+      if (typeof res === 'undefined') {
+        if (cb && typeof cb === 'function') {
+          return cb(true, null);
+        } else {
+          return false;
+        }
+      }
+    }
+    if (cb && typeof cb === 'function') {
+      return cb(false, res);
+    } else {
+      return res;
+    }
   };
 
   // -------------------- MISC --------------------
