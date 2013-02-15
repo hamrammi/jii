@@ -3,11 +3,12 @@
  *
  * Helper library that makes work with classes even better
  *
- * @version: 0.2.6 (last update: 19.01.2013)
+ * @version: 0.2.7 (last update: 15.02.2013)
  * @author: hamrammi@gmail.com
  */
 // TODO: private methods and variables
 (function() {
+  'use strict';
   var root = this;
 
   root.Class = (function() {
@@ -79,7 +80,7 @@
       Class.prototype.constructor = Class;
 
       // TODO: Should this be rewritten?
-      Class.prototype['accessor'] = function(targetClass) {
+      Class.prototype.accessor = function(targetClass) {
         targetClass = targetClass || Class.prototype.superclass;
         return targetClass.prototype;
       };
@@ -92,6 +93,6 @@
 
     return {
       create: create
-    }
+    };
   })();
 }).call(this);

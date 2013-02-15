@@ -3,14 +3,17 @@
  *
  * Helper library that makes work with javascript even better
  *
- * @version: 0.2.4 (last update: 20.01.2013)
+ * @version: 0.3.0 (last update: 01.02.2013)
  * @author: hamrammi@gmail.com
  */
 (function() {
-  var VERSION = '0.2.4';
+  'use strict';
+
+  var VERSION = '0.3.0';
   var root = this;
 
   var
+    arrayProto    = Array.prototype,
     unshift       = Array.prototype.unshift,
     slice         = Array.prototype.slice,
     toString      = Object.prototype.toString;
@@ -19,10 +22,12 @@
   var jii = function(obj, func) {
     func = func || null;
     if (func) {
-      console.log(func.apply(new W(obj)));
+//      unshift.call(arguments, obj);
+      func.call(obj);
+//      console.log(func.apply(new W(obj)));
 //      result(func.apply(new W(obj)), true);
 //      return false;
-    }
+    } else
     return new W(obj);
   };
 
@@ -32,23 +37,31 @@
 
   // -------------------- HELPERS --------------------
 
+  var
+    objArray    = '[object Array]',
+    objString   = '[object String]',
+    objNumber   = '[object Number]',
+    objObject   = '[object Object]',
+    objFunction = '[object Function]',
+    objBoolean  = '[object Boolean]';
+
   var isArray = jii.isArray = function(obj) {
-    return toString.call(obj) === '[object Array]';
+    return toString.call(obj) === objArray;
   };
   var isNumber = jii.isNumber = function(obj) {
-    return toString.call(obj) === '[object Number]';
+    return toString.call(obj) === objNumber;
   };
   var isString = jii.isString = function(obj) {
-    return toString.call(obj) === '[object String]';
+    return toString.call(obj) === objString;
   };
   var isObject = jii.isObject = function(obj) {
-    return toString.call(obj) === '[object Object]';
+    return toString.call(obj) === objObject;
   };
   var isFunction = jii.isFunction = function(obj) {
-    return toString.call(obj) === '[object Function]';
+    return toString.call(obj) === objFunction;
   };
   var isBoolean = jii.isBoolean = function(obj) {
-    return toString.call(obj) === '[object Boolean]';
+    return toString.call(obj) === objBoolean;
   };
 
   var typeError = function(expected, got) {
@@ -62,6 +75,18 @@
       throw new TypeError(error);
     }
     return arg;
+  };
+
+  // Make sure an `obj` has `length` property
+  // e.g.: string, array
+  var isStringOrArray = function(func, obj) {
+    var type = toString.call(obj);
+    switch (type) {
+      case objString: break;
+      case objArray: break;
+      default: validateType(func, obj, 'string or array');
+    }
+    return obj;
   };
 
   // -------------------- STRINGS --------------------
@@ -143,8 +168,8 @@
     }
   };
 
-  // Find position of character in string
-  jii.position = function(string, chr) {
+  // Find positions of the character in the string
+  jii.positions = function(string, chr) {
     string = validateType('position', string, 'string');
     chr = validateType('position', chr, 'string');
     var positions = [];
@@ -156,6 +181,32 @@
     return positions;
   };
 
+  // Reverse string
+  jii.reverse = function(string) {
+    string = validateType('reverse', string, 'string');
+    var reversed = '';
+    for (var i = 0, l = string.length - 1; i <= l; i++) {
+      reversed += string.charAt(l-i);
+    }
+    return reversed;
+  };
+
+  // Trim strings
+  jii.trim = function(string, position) {
+    string = validateType('trim', string, 'string');
+    position = position ? validateType('trim', position, 'string') : 'both';
+    switch (position) {
+      case 'both':
+        return string.replace(/^\s+|\s+$/g, ''); break;
+      case 'left':
+        return string.replace(/^\s+/, ''); break;
+      case 'right':
+        return string.replace(/\s+$/, ''); break;
+      case 'full':
+        return string.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, '').replace(/\s+/g, ' '); break;
+      default: throw new Error('"jii.trim": unexpected param "' + position + '"');
+    }
+  };
 
   // -------------------- ARRAYS --------------------
 
@@ -165,7 +216,7 @@
     var result = [];
     if (obj == null) return result;
     // Delegate to `ECMAScript 5` native `map` if available
-    if (Array.prototype.map) {
+    if (arrayProto.map) {
       return obj.map(iterator, context);
     }
     for (var i = 0, l = obj.length; i < l; i++) {
@@ -176,17 +227,16 @@
 
   // Check whether an object has chain of properties
   jii.hasChain = function(obj, chain, cb) {
-    // Check whether an 'obj' argument is type of 'object'
     if (!isObject(obj)) typeError('object', typeof obj);
     chain = validateType('hasChain', chain, 'string');
     cb = cb || null;
     // Keys to be evaluated
     var keys = chain.split('.');
     // Result object or other typed data
-    var res = obj;
+    var result = obj;
     for (var i = 0, l = keys.length; i < l; i++) {
-      res = res[keys[i]];
-      if (typeof res === 'undefined') {
+      result = result[keys[i]];
+      if (typeof result === 'undefined') {
         if (cb && typeof cb === 'function') {
           return cb(true, null);
         } else {
@@ -195,10 +245,37 @@
       }
     }
     if (cb && typeof cb === 'function') {
-      return cb(false, res);
+      return cb(false, result);
     } else {
-      return res;
+      return result;
     }
+  };
+
+  // ------------------ OBJECTS -------------------
+
+  // Check whether `objA` includes `objB`
+  jii.contains = function(objA, objB) {
+    for (var key in objB) {
+      if (objB.hasOwnProperty(key)) {
+        if (!objA.hasOwnProperty(key)) return false;
+        else if (objA[key] !== objB[key]) {
+          if (isObject(objA[key]) && isObject(objB[key])) {
+            return jii.isEqual(objA[key], objB[key]);
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  // Returns the length (size) of an object
+  jii.size = function(obj) {
+    var length = 0, key;
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) length++;
+    }
+    return length;
   };
 
   // -------------------- MISC --------------------
@@ -206,20 +283,55 @@
   // Split obj into characters and count occurrence of each one
   jii.occurrences = function(obj, chr) {
     chr = chr || null;
-    var type = toString.call(obj);
-    switch (type) {
-      case '[object String]': break;
-      case '[object Number]':
-        obj = '' + obj; break;
-      case '[object Array]': break;
-      default: typeError('string or number or array', typeof obj);
-    }
+    obj = isStringOrArray('occurrences', obj);
     var dict = {};
     for (var i = 0, l = obj.length; i < l; i++) {
       dict[obj[i]] = dict[obj[i]] ? dict[obj[i]] + 1 : 1;
     }
     if (chr) return dict[chr];
     return dict;
+  };
+
+  // Check whether an `obj` has `chr`
+  jii.has = function(obj, chr) {
+    var _find = function(obj, chr) {
+      var type = toString(chr); // TODO: do this todo. can be [1, {a: 'foo'}] == [2, {a: 'foo'}]
+      if (type !== objArray || type !== objObject) {
+        //
+      }
+      for (var i = 0, l = obj.length; i < l; i++) {
+        if (obj[i] === chr) {
+          continue;
+        }
+      }
+    };
+    switch (toString.call(obj)) {
+      case objString:
+        if (isString(chr)) return obj.split(chr).length === 2; break;
+      case objObject:
+        if (isObject(chr)) return jii.contains(obj, chr); break;
+      case objArray:
+        return _find(obj, chr); break;
+      default: return validateType('has', obj, 'string or array or object');
+    }
+  };
+
+  // `jii.has` with swapped arguments
+  jii.in = function(chr, obj) { return jii.has(obj, chr); };
+
+  // Compares two objects
+  jii.isEqual = function(objA, objB) {
+    if (isObject(objA) && isObject(objB)) {
+      if (jii.size(objA) !== jii.size(objB)) return false;
+      return jii.contains(objA, objB);
+    } else if (isArray(objA) && isArray(objB)) {
+      if (objA.length !== objB.length) return false;
+      for (var i = 0, l = objA.length; i < l; i++) {
+        if (typeof objB[i] === 'undefined') { return false; }
+      }
+      return true;
+    }
+    return objA === objB;
   };
 
   // -------------------- SYSTEM --------------------
