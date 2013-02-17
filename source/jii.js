@@ -32,7 +32,8 @@
     objNumber   = '[object Number]',
     objObject   = '[object Object]',
     objFunction = '[object Function]',
-    objBoolean  = '[object Boolean]';
+    objBoolean  = '[object Boolean]',
+    objNull     = '[object Null]';
 
   var isArray = jii.isArray = function(obj) {
     return typeof obj === 'object' && obj !== null && Array.isArray(obj);
@@ -51,6 +52,9 @@
   };
   var isBoolean = jii.isBoolean = function(obj) {
     return toString.call(obj) === objBoolean;
+  };
+  var isNull = jii.isNull = function(obj) {
+    return toString.call(obj) === objNull;
   };
 
   var typeError = function(expected, got) {
@@ -98,61 +102,59 @@
 
 
   // Checks whether last character of string equals to lastChar
-  jii.endsWith = function(string, length_or_lastChars, caseInsensitive) {
+  jii.endsWith = function(string, value, caseInsensitive) {
     string = validateType('endsWith', string, 'string');
-    length_or_lastChars = length_or_lastChars || null;
+    value = value || null;
     caseInsensitive = caseInsensitive || false;
     var length = string.length;
-    if (!length_or_lastChars && !caseInsensitive) {
-      return string.charAt(length - 1);
-    } else if (length_or_lastChars && !caseInsensitive) {
-      if (typeof length_or_lastChars === 'string') {
-        length = length_or_lastChars.length;
-        return string.slice(string.length - length) === length_or_lastChars;
-      } else if (typeof length_or_lastChars === 'number') {
-        return string.slice(string.length - length_or_lastChars);
+    if (value && !caseInsensitive) {
+      if (typeof value === 'string') {
+        length = value.length;
+        return string.slice(string.length - length) === value;
+      } else if (typeof value === 'number') {
+        return string.slice(string.length - value);
       } else {
-        typeError('string or number', typeof length_or_lastChars);
+        typeError('string or number', typeof value);
       }
-    } else if (length_or_lastChars && caseInsensitive) {
-      if (typeof length_or_lastChars === 'number') {
+    } else if (value && caseInsensitive) {
+      if (typeof value === 'number') {
         typeError('string', 'number');
-      } else if (typeof length_or_lastChars === 'string') {
-        length = length_or_lastChars.length;
-        return string.slice(string.length - length).toLowerCase() === length_or_lastChars.toLowerCase();
+      } else if (typeof value === 'string') {
+        length = value.length;
+        return string.slice(string.length - length).toLowerCase() === value.toLowerCase();
       } else {
-        typeError('string', typeof length_or_lastChars);
+        typeError('string', typeof value);
       }
     }
+    return string.charAt(length - 1);
   };
 
   // Check whether first letter of string equals to firstChar
-  jii.startsWith = function(string, length_or_firstChars, caseInsensitive) {
+  jii.startsWith = function(string, value, caseInsensitive) {
     string = validateType('startsWith', string, 'string');
-    length_or_firstChars = length_or_firstChars || null;
+    value = value || null;
     caseInsensitive = caseInsensitive || false;
     var length = 0;
-    if (!length_or_firstChars && !caseInsensitive) {
-      return string.charAt(0);
-    } else if (length_or_firstChars && !caseInsensitive) {
-      if (typeof length_or_firstChars === 'string') {
-        length = length_or_firstChars.length;
-        return string.slice(0, length) === length_or_firstChars;
-      } else if (typeof length_or_firstChars === 'number') {
-        return string.slice(0, length_or_firstChars);
+    if (value && !caseInsensitive) {
+      if (typeof value === 'string') {
+        length = value.length;
+        return string.slice(0, length) === value;
+      } else if (typeof value === 'number') {
+        return string.slice(0, value);
       } else {
-        typeError('string or number', typeof length_or_firstChars);
+        typeError('string or number', typeof value);
       }
-    } else if (length_or_firstChars && caseInsensitive) {
-      if (typeof length_or_firstChars === 'number') {
+    } else if (value && caseInsensitive) {
+      if (typeof value === 'number') {
         typeError('string', 'number');
-      } else if (typeof length_or_firstChars === 'string') {
-        length = length_or_firstChars.length;
-        return string.slice(0, length).toLowerCase() === length_or_firstChars.toLowerCase();
+      } else if (typeof value === 'string') {
+        length = value.length;
+        return string.slice(0, length).toLowerCase() === value.toLowerCase();
       } else {
-        typeError('string', typeof length_or_firstChars);
+        typeError('string', typeof value);
       }
     }
+    return string.charAt(0);
   };
 
   // Find positions of the character in the string
@@ -312,6 +314,7 @@
   // Compares two objects
   jii.isEqual = function(a, b) {
     if (toString.call(a) !== toString.call(b)) return false;
+    if (typeof a === 'undefined' || isNull(a)) return false;
     if (isObject(a)) {
       return jii.size(a) === jii.size(b) ? jii.has(a, b) : false;
     } else if (isArray(a)) {
@@ -380,4 +383,4 @@
 
   // Expose `jii` as global variable
   root.jii = jii;
-})();
+}).call(this);
