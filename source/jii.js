@@ -3,33 +3,22 @@
  *
  * Helper library that makes work with javascript even better
  *
- * @version: 0.3.0 (last update: 01.02.2013)
+ * @version: 0.3.4 (last update: 17.02.2013)
  * @author: hamrammi@gmail.com
  */
 (function() {
   'use strict';
 
-  var VERSION = '0.3.0';
+  var VERSION = '0.3.4';
   var root = this;
 
   var
     arrayProto    = Array.prototype,
     unshift       = Array.prototype.unshift,
-    slice         = Array.prototype.slice,
     toString      = Object.prototype.toString;
 
   // Local copy of `jii` for using below.
-  var jii = function(obj, func) {
-    func = func || null;
-    if (func) {
-//      unshift.call(arguments, obj);
-      func.call(obj);
-//      console.log(func.apply(new W(obj)));
-//      result(func.apply(new W(obj)), true);
-//      return false;
-    } else
-    return new W(obj);
-  };
+  var jii = function(obj) { return new W(obj); };
 
   jii.fn = jii.prototype;
 
@@ -46,7 +35,7 @@
     objBoolean  = '[object Boolean]';
 
   var isArray = jii.isArray = function(obj) {
-    return toString.call(obj) === objArray;
+    return typeof obj === 'object' && obj !== null && Array.isArray(obj);
   };
   var isNumber = jii.isNumber = function(obj) {
     return toString.call(obj) === objNumber;
@@ -55,7 +44,7 @@
     return toString.call(obj) === objString;
   };
   var isObject = jii.isObject = function(obj) {
-    return toString.call(obj) === objObject;
+    return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
   };
   var isFunction = jii.isFunction = function(obj) {
     return toString.call(obj) === objFunction;
@@ -114,7 +103,6 @@
     length_or_lastChars = length_or_lastChars || null;
     caseInsensitive = caseInsensitive || false;
     var length = string.length;
-
     if (!length_or_lastChars && !caseInsensitive) {
       return string.charAt(length - 1);
     } else if (length_or_lastChars && !caseInsensitive) {
@@ -144,7 +132,6 @@
     length_or_firstChars = length_or_firstChars || null;
     caseInsensitive = caseInsensitive || false;
     var length = 0;
-
     if (!length_or_firstChars && !caseInsensitive) {
       return string.charAt(0);
     } else if (length_or_firstChars && !caseInsensitive) {
@@ -259,7 +246,8 @@
       if (objB.hasOwnProperty(key)) {
         if (!objA.hasOwnProperty(key)) return false;
         else if (objA[key] !== objB[key]) {
-          if (isObject(objA[key]) && isObject(objB[key])) {
+          if ((isObject(objA[key]) && isObject(objB[key]))
+            || (isArray(objA[key]) && isArray(objB[key]))) {
             return jii.isEqual(objA[key], objB[key]);
           }
           return false;
@@ -294,24 +282,26 @@
 
   // Check whether an `obj` has `chr`
   jii.has = function(obj, chr) {
-    var _find = function(obj, chr) {
-      var type = toString(chr); // TODO: do this todo. can be [1, {a: 'foo'}] == [2, {a: 'foo'}]
-      if (type !== objArray || type !== objObject) {
-        //
-      }
-      for (var i = 0, l = obj.length; i < l; i++) {
-        if (obj[i] === chr) {
-          continue;
-        }
-      }
-    };
     switch (toString.call(obj)) {
       case objString:
-        if (isString(chr)) return obj.split(chr).length === 2; break;
+        if (isString(chr)) return obj.indexOf(chr) !== -1;
+        else return false; break;
       case objObject:
-        if (isObject(chr)) return jii.contains(obj, chr); break;
+        if (isObject(chr)) return jii.contains(obj, chr);
+        else return false; break;
       case objArray:
-        return _find(obj, chr); break;
+        if (isString(chr) || isNumber(chr) || isBoolean(chr))
+          return obj.indexOf(chr) !== -1;
+        var i, l = obj.length;
+        if (isObject(chr))
+          for (i = 0; i < l; i++) {
+            if (isObject(obj[i])) return jii.isEqual(obj[i], chr);
+          }
+        if (isArray(chr))
+          for (i = 0; i < l; i++) {
+            if (isArray(obj[i])) return jii.isEqual(obj[i], chr);
+          }
+        return false; break;
       default: return validateType('has', obj, 'string or array or object');
     }
   };
@@ -320,18 +310,20 @@
   jii.in = function(chr, obj) { return jii.has(obj, chr); };
 
   // Compares two objects
-  jii.isEqual = function(objA, objB) {
-    if (isObject(objA) && isObject(objB)) {
-      if (jii.size(objA) !== jii.size(objB)) return false;
-      return jii.contains(objA, objB);
-    } else if (isArray(objA) && isArray(objB)) {
-      if (objA.length !== objB.length) return false;
-      for (var i = 0, l = objA.length; i < l; i++) {
-        if (typeof objB[i] === 'undefined') { return false; }
+  jii.isEqual = function(a, b) {
+    if (toString.call(a) !== toString.call(b)) return false;
+    if (isObject(a)) {
+      return jii.size(a) === jii.size(b) ? jii.has(a, b) : false;
+    } else if (isArray(a)) {
+      if (a.length !== b.length) return false;
+      for (var i = 0, l = a.length; i < l; i++) {
+        if (!jii.isEqual(a[i], b[i])) return false;
       }
       return true;
+    } else if (isFunction(a)) {
+      return a.toString() === b.toString();
     }
-    return objA === objB;
+    return a === b;
   };
 
   // -------------------- SYSTEM --------------------
@@ -388,4 +380,4 @@
 
   // Expose `jii` as global variable
   root.jii = jii;
-}).call(this);
+})();
