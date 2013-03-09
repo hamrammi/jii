@@ -8,13 +8,12 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.3.7';
+  var VERSION = '0.3.11';
   var root = this;
 
-  var
-    arrayProto = Array.prototype,
-    unshift = Array.prototype.unshift,
-    toString = Object.prototype.toString;
+  var arrayProto = Array.prototype,
+      unshift = Array.prototype.unshift,
+      toString = Object.prototype.toString;
 
   // Local copy of `jii` for using below.
   var jii = function(obj) { return new W(obj); };
@@ -25,14 +24,13 @@
 
   // -------------------- HELPERS --------------------
 
-  var
-    objArray = '[object Array]',
-    objString = '[object String]',
-    objNumber = '[object Number]',
-    objObject = '[object Object]',
-    objFunction = '[object Function]',
-    objBoolean = '[object Boolean]',
-    objNull = '[object Null]';
+  var objArray = '[object Array]',
+      objString = '[object String]',
+      objNumber = '[object Number]',
+      objObject = '[object Object]',
+      objFunction = '[object Function]',
+      objBoolean = '[object Boolean]',
+      objNull = '[object Null]';
 
   var isArray = jii.isArray = function(obj) {
     return typeof obj === 'object' && obj !== null && Array.isArray(obj);
@@ -100,6 +98,24 @@
     }
   };
 
+  // Convert string to unicode
+  jii.toUnicode = function(string) {
+    var uniChar;
+    return jii.walk(string, function(chr) {
+      uniChar = chr.charCodeAt(0).toString(16);
+      while (uniChar.length < 4) {
+        uniChar = '0' + uniChar;
+      }
+      return '\\u' + uniChar;
+    });
+  };
+
+  // Convert string to hex
+  jii.toCharCode = function(string) {
+    return jii.walk(string, function(chr) {
+      return '\\x' + chr.charCodeAt(0).toString(16);
+    });
+  };
 
   // Checks whether last character of string equals to lastChar
   jii.endsWith = function(string, value, caseInsensitive) {
@@ -264,7 +280,6 @@
 
   // Maps each value of `obj` with `iterator` function
   jii.map = function(obj, iterator, context) {
-    context = context || root;
     var result = [];
     if (obj == null) return result;
     // Delegate to `ECMAScript 5` native `map` if available
@@ -410,6 +425,21 @@
       return a.toString() === b.toString();
     }
     return a === b;
+  };
+
+  jii.walk = function(obj, mutator, context) {
+    var result;
+    switch (toString.call(obj)) {
+      case objString:
+        result = '';
+        for (var i = 0, l = obj.length; i < l; i++)
+          result += mutator.call(context, obj[i]);
+        break;
+      case objArray:
+        result = jii.map(obj, mutator, context); break;
+      default: typeError('string or array', typeof obj);
+    }
+    return result;
   };
 
   // -------------------- SYSTEM --------------------
