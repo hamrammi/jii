@@ -3,19 +3,18 @@
  *
  * Helper library that makes work with javascript even better
  *
- * @version: 0.3.4 (last update: 17.02.2013)
  * @author: hamrammi@gmail.com
  */
 (function() {
   'use strict';
 
-  var VERSION = '0.3.4';
+  var VERSION = '0.3.7';
   var root = this;
 
   var
-    arrayProto    = Array.prototype,
-    unshift       = Array.prototype.unshift,
-    toString      = Object.prototype.toString;
+    arrayProto = Array.prototype,
+    unshift = Array.prototype.unshift,
+    toString = Object.prototype.toString;
 
   // Local copy of `jii` for using below.
   var jii = function(obj) { return new W(obj); };
@@ -27,13 +26,13 @@
   // -------------------- HELPERS --------------------
 
   var
-    objArray    = '[object Array]',
-    objString   = '[object String]',
-    objNumber   = '[object Number]',
-    objObject   = '[object Object]',
+    objArray = '[object Array]',
+    objString = '[object String]',
+    objNumber = '[object Number]',
+    objObject = '[object Object]',
     objFunction = '[object Function]',
-    objBoolean  = '[object Boolean]',
-    objNull     = '[object Null]';
+    objBoolean = '[object Boolean]',
+    objNull = '[object Null]';
 
   var isArray = jii.isArray = function(obj) {
     return typeof obj === 'object' && obj !== null && Array.isArray(obj);
@@ -64,7 +63,8 @@
   var validateType = function(func, arg, expected) {
     var got = typeof arg;
     if (got !== expected) {
-      var error = '"jii.' + func + '": expected "' + expected + '", got "' + got + '"';
+      var error = '"jii.' + func + '": expected "' + expected +
+        '", got "' + got + '"';
       throw new TypeError(error);
     }
     return arg;
@@ -88,10 +88,10 @@
   jii.capitalize = function(string, num) {
     string = validateType('capitalize', string, 'string');
     num = num || null;
-    var transformed = [];
     if (!num) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     } else {
+      var transformed = [];
       num = validateType('capitalize', num, 'number');
       for (var i = 0; i < num; i++) {
         transformed[i] = string.charAt(i).toUpperCase();
@@ -121,7 +121,8 @@
         typeError('string', 'number');
       } else if (typeof value === 'string') {
         length = value.length;
-        return string.slice(string.length - length).toLowerCase() === value.toLowerCase();
+        var lowerCased = string.slice(string.length - length).toLowerCase();
+        return lowerCased === value.toLowerCase();
       } else {
         typeError('string', typeof value);
       }
@@ -175,7 +176,7 @@
     string = validateType('reverse', string, 'string');
     var reversed = '';
     for (var i = 0, l = string.length - 1; i <= l; i++) {
-      reversed += string.charAt(l-i);
+      reversed += string.charAt(l - i);
     }
     return reversed;
   };
@@ -192,12 +193,74 @@
       case 'right':
         return string.replace(/\s+$/, ''); break;
       case 'full':
-        return string.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, '').replace(/\s+/g, ' '); break;
-      default: throw new Error('"jii.trim": unexpected param "' + position + '"');
+        return string.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, '')
+          .replace(/\s+/g, ' '); break;
+      default:
+        throw new Error('"jii.trim": unexpected param "' + position + '"');
     }
   };
 
+  // Capitalize each word in a string
+  jii.title = function(string) {
+    string = validateType('title', string, 'string');
+    return string.replace(/[^\s]+/gm, function(word) {
+      return jii.capitalize(word);
+    });
+  };
+
   // -------------------- ARRAYS --------------------
+
+  var value = function(obj, what) {
+    var i, l, value, words;
+    var _result = function(obj, what) {
+      var value, i, l = obj.length, currentLength = obj[0].length;
+      if (l === 1) return obj[0];
+      for (i = 0; i < l; i++) {
+        if (what === 'max')
+          if (currentLength < obj[i].length) {
+            value = obj[i]; currentLength = obj[i].length;
+          }
+        if (what === 'min')
+          if (currentLength > obj[i].length) {
+            value = obj[i]; currentLength = obj[i].length;
+          }
+      }
+      return value;
+    };
+    switch (toString.call(obj)) {
+      case objArray:
+        value = obj[0]; l = obj.length;
+        var type = toString.call(value);
+        if (type === objNumber) {
+          for (i = 0; i < l; i++) {
+            if (typeof obj[i] !== 'number') typeError('number', typeof obj[i]);
+            if (what === 'max') value = value > obj[i] ? value : obj[i];
+            if (what === 'min') value = value < obj[i] ? value : obj[i];
+          }
+        }
+        if (type === objString || type === objArray) return _result(obj, what);
+        break;
+      case objString:
+        words = jii.trim(obj, 'full').split(' '); l = words.length;
+        return _result(words, what); break;
+      default: typeError('string or array', typeof obj);
+    }
+    return value;
+  };
+
+  // Compares similar arrays [1, 2, 3, 4] == [3, 4, 2, 1]
+  jii.similar = function(a, b) {
+    for (var i = 0, l = a.length; i < l; i++) {
+      if (!jii.has(b, a[i])) return false;
+    }
+    return true;
+  };
+
+  // Max value of an array
+  jii.max = function(array) { return value(array, 'max'); };
+
+  // Min value of an array
+  jii.min = function(array) { return value(array, 'min'); };
 
   // Maps each value of `obj` with `iterator` function
   jii.map = function(obj, iterator, context) {
@@ -240,17 +303,37 @@
     }
   };
 
+  // Select elements that meet the condition
+  jii.select = function(array, selector) {
+    if (!isArray(array)) typeError('array', typeof array);
+    var result = [];
+    jii.map(array, function(x) {
+      if (selector(x) === true) result.push(x);
+    });
+    return result;
+  };
+
+  // Reject elements that meet the condition
+  jii.reject = function(array, rejector) {
+    if (!isArray(array)) typeError('array', typeof array);
+    var result = [];
+    jii.map(array, function(x) {
+      if (rejector(x) === false) result.push(x);
+    });
+    return result;
+  };
+
   // ------------------ OBJECTS -------------------
 
-  // Check whether `objA` includes `objB`
-  jii.contains = function(objA, objB) {
-    for (var key in objB) {
-      if (objB.hasOwnProperty(key)) {
-        if (!objA.hasOwnProperty(key)) return false;
-        else if (objA[key] !== objB[key]) {
-          if ((isObject(objA[key]) && isObject(objB[key]))
-            || (isArray(objA[key]) && isArray(objB[key]))) {
-            return jii.isEqual(objA[key], objB[key]);
+  // Check whether `a` includes `b`
+  jii.contains = function(a, b) {
+    for (var prop in b) {
+      if (b.hasOwnProperty(prop)) {
+        if (!a.hasOwnProperty(prop)) return false;
+        else if (a[prop] !== b[prop]) {
+          if ((isObject(a[prop]) && isObject(b[prop])) ||
+            (isArray(a[prop]) && isArray(b[prop]))) {
+            return jii.isEqual(a[prop], b[prop]);
           }
           return false;
         }
