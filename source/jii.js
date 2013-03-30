@@ -16,7 +16,7 @@
       toString = Object.prototype.toString;
 
   // Local copy of `jii` for using below.
-  var jii = function(obj) { return new W(obj); };
+  var jii = function(obj) { return new Wrapper(obj); };
 
   jii.fn = jii.prototype;
 
@@ -80,6 +80,17 @@
     return obj;
   };
 
+  // Make sure an `obj` is enumerable
+  var isEnumerable = function(func, obj) {
+    switch (toString.call(obj)) {
+      case objString: break;
+      case objArray: break;
+      case objObject: break;
+      default: validateType(func, obj, 'enumerable');
+    }
+    return obj;
+  };
+
   // -------------------- STRINGS --------------------
 
   // Capitalize string
@@ -96,6 +107,28 @@
       }
       return transformed.join('') + string.slice(num);
     }
+  };
+
+  jii.swapCase = function(string) {
+    string = validateType('swapCase', string, 'string');
+    var swapCase = function(chr) {
+      return (jii.isUpperCased(chr)) ? chr.toLowerCase() : chr.toUpperCase();
+    };
+    return jii.walk(string, swapCase);
+  };
+
+  jii.isUpperCased = function(string) {
+    for (var i = 0, l = string.length; i < l; i++) {
+      if (!string[i].match(/[A-ZА-Я]+/)) return false;
+    }
+    return true;
+  };
+
+  jii.isLowerCased = function(string) {
+    for (var i = 0, l = string.length; i < l; i++) {
+      if (!string[i].match(/[a-zа-я]+/)) return false;
+    }
+    return true;
   };
 
   // Convert string to unicode
@@ -219,9 +252,8 @@
   // Capitalize each word in a string
   jii.title = function(string) {
     string = validateType('title', string, 'string');
-    return string.replace(/[^\s]+/gm, function(word) {
-      return jii.capitalize(word);
-    });
+    var _title = function(word) { return jii.capitalize(word); };
+    return string.replace(/[^\s]+/gm, _title);
   };
 
   // -------------------- ARRAYS --------------------
@@ -233,11 +265,11 @@
       if (l === 1) return obj[0];
       for (i = 0; i < l; i++) {
         if (what === 'max')
-          if (currentLength < obj[i].length) {
+          if (currentLength <= obj[i].length) {
             value = obj[i]; currentLength = obj[i].length;
           }
         if (what === 'min')
-          if (currentLength > obj[i].length) {
+          if (currentLength >= obj[i].length) {
             value = obj[i]; currentLength = obj[i].length;
           }
       }
@@ -277,6 +309,15 @@
 
   // Min value of an array
   jii.min = function(array) { return value(array, 'min'); };
+
+  jii.zip = function(a, b) {
+    if (!isArray(a) || !isArray(b)) typeError('array', [typeof a, typeof b]);
+    if (a.length !== b.length)
+      throw new Error('jii.zip: arrays are not the same length');
+    var result = [];
+    for (var i = 0, l = a.length; i < l; i++) result.push([a[i], b[i]]);
+    return result;
+  };
 
   // Maps each value of `obj` with `iterator` function
   jii.map = function(obj, iterator, context) {
@@ -380,6 +421,42 @@
     return dict;
   };
 
+  // Count occurrences of all regexp characters
+  jii.count = function(obj, regexp) {
+    // TODO: this should work with String, Array, Object objects
+
+  };
+
+  // Retrieve each `slice` elements from an `obj`
+  jii.eachSlice = function(obj, slice) {
+    // TODO: this should work with String, Array, Object objects
+  };
+
+  // Similar to jii.eachSlice() method but with some changes:
+  // jii.eachCons([1, 2, 3, 4, 5]) => [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+  jii.eachCons = function(obj, slice) {};
+
+  // Basic function to walk through arrays.
+  // Iterator function takes 3 arguments (element, index, array)
+  jii.each = jii.forEach = function(obj, iterator, context) {
+    var _each = function() {
+      for (var i = 0, l = obj.length; i < l; i++)
+        iterator.call(context, obj[i], i, obj);
+    };
+    switch (toString.call(obj)) {
+      case objArray:
+        if (arrayProto.forEach) obj.forEach(iterator, context);
+        else _each(); break;
+      case objString: _each(); break;
+      case objObject:
+        for (var key in obj)
+          if (obj.hasOwnProperty(key))
+            iterator.call(context, obj[key], key, obj);
+        break;
+      default: validateType('each(forEach)', obj, 'string or array or object');
+    }
+  };
+
   // Check whether an `obj` has `chr`
   jii.has = function(obj, chr) {
     switch (toString.call(obj)) {
@@ -442,10 +519,22 @@
     return result;
   };
 
+  // Freeze script for a period of time
+  // TODO: todo this todo
+  jii.sleep = function(delay) {
+    var ts = new Date().getTime();
+    var sleep = (function() {
+      while (new Date().getTime() - ts < delay) {
+        setTimeout(function() { return sleep }, 100);
+      }
+    })();
+    return sleep;
+  };
+
   // -------------------- SYSTEM --------------------
 
-  jii.chain = function() {
-    W._chain = true;
+  jii.begin = function() {
+    Wrapper._chain = true;
     return this;
   };
 
@@ -460,20 +549,20 @@
   };
 
   // A `wrapper` function
-  var W = function(obj) { this._w = obj; };
+  var Wrapper = function(obj) { this._wrapped = obj; };
 
-  jii.prototype = W.prototype;
+  jii.prototype = Wrapper.prototype;
 
   // Helper function to continue chaining
   var result = function(obj, chain) {
-    return chain ? jii(obj).chain() : obj;
+    return chain ? jii(obj).begin() : obj;
   };
 
   // Helper function to extend `wrapper` prototype
   var extendWrapperPrototype = function(name, func) {
-    W.prototype[name] = function() {
-      // Add `this._w` as a first element to `arguments` array
-      unshift.call(arguments, this._w);
+    Wrapper.prototype[name] = function() {
+      // Add `this._wrapped` as a first element to `arguments` array
+      unshift.call(arguments, this._wrapped);
       return result(func.apply(jii, arguments), this._chain);
     };
   };
@@ -487,12 +576,12 @@
     }
   })();
 
-  W.prototype.chain = function() {
+  Wrapper.prototype.begin = function() {
     this._chain = true;
     return this;
   };
 
-  W.prototype.value = function() { return this._w; };
+  Wrapper.prototype.end = function() { return this._wrapped; };
 
   // Expose `jii` as global variable
   root.jii = jii;
