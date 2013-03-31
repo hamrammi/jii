@@ -3,7 +3,7 @@
  *
  * Helper library that makes work with classes even better
  *
- * @version: 0.2.7 (last update: 15.02.2013)
+ * @version: 0.2.7
  * @author: hamrammi@gmail.com
  */
 // TODO: private methods and variables
@@ -24,7 +24,7 @@
       }
 
       var Class = function() {
-        // When class is called with `new` keyword `this` points to class instance
+        // Call constructor function when new instance is created
         Class.prototype.init.apply(this, arguments);
       };
 
@@ -47,7 +47,7 @@
 
         // At the moment superClass can see only one level inheritance
         // so superClass's subclasses array will contain only those
-        // classes which was extended primary by superClass
+        // classes which were extended primary by this superClass
         // E.g.: var C1 = Class.create({ ... }); // superclass
         // var C2 = Class.create(C1, { ... }); var C3 = Class.create(C1, { ... });
         // var C4 = Class.create(C2, { ... }); var C5 = Class.create(C3, { ... });
@@ -64,12 +64,19 @@
         }
       };
 
-      // Prototype class with `@param obj` methods
+      // Prototype class with `obj` methods
       // so every instance of this class can use them
       Class.extend = function(obj) {
         for (var i in obj) {
           if (obj.hasOwnProperty(i)) {
-            Class.prototype[i] = obj[i];
+            if (i.charAt(0) === '_') {
+              Object.defineProperty(Class.prototype, i, {
+//                enumerable: true,
+                value: obj[i]
+              });
+            } else {
+              Class.prototype[i] = obj[i];
+            }
           }
         }
       };
@@ -85,7 +92,7 @@
         return targetClass.prototype;
       };
 
-      // Finally, extend class with given `@param obj`
+      // Finally, extend class with given `obj`
       Class.extend(obj);
 
       return Class;
