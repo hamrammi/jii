@@ -3,7 +3,7 @@
  *
  * Helper library that highlights code
  *
- * @version: 0.1.0 (last update: 03.02.2013)
+ * @version: 0.1.1 (last update: 31.03.2013)
  * @author: hamrammi@gmail.com
  */
 (function() {
@@ -12,8 +12,8 @@
   /**
    * Root function to be exposed as global
    *
-   * @param el Elements to be highlighted
-   * @param params {Object} Contains user predefined params
+   * @param {DOM} el Elements to be highlighted.
+   * @param {Object} params Contains user predefined params.
    */
   var highlighter = function(el, params) {
     params = params || {};
@@ -24,7 +24,7 @@
         '[[comment]]$1[[span]]'
       ],
       keywords: [
-        /(var|function|alert|return|class|this|def)/gm,
+        /(var|function|alert|return|class|this|def|module|do|end)/gm,
         '[[keyword]]$1[[span]]'
       ],
       reserved: [
