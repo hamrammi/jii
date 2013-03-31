@@ -3,7 +3,7 @@
  *
  * Helper library that makes work with classes even better
  *
- * @version: 0.2.7
+ * @version: 0.2.8
  * @author: hamrammi@gmail.com
  */
 // TODO: private methods and variables
