@@ -10,8 +10,8 @@ Growing library that adds some helpful methods for you pleasure.
 - Add much more methods to make functional programming better
 - Find and fix bugs
 - Make stable release as soon as possible
->
-Some examples:
+
+####Some examples:
 ```javascript
 jii({ a: 'foo', b: { c: 'bar', d: 'baz' }, e: { f: { g: { h: true } } } }).has({ e: { f: { g: { h: true } } } }); // true
 jii.isEqual({ a: 'foo', b: { c: [function() { return 'bar' }] } }, { a: 'foo', b: { c: [function() { return 'bar' }] } }); // true
@@ -25,8 +25,8 @@ Emulates "class system". Makes work with OOP in JavaScript much better.
 ###Milestone:
 - Private members and variables (is it possible?)
 - Correct constructor property
->
-Examples:
+
+####Examples:
 ```javascript
 var Parent = Class.create({
   init: function(name) {
@@ -56,10 +56,11 @@ Simple tool to highlight code snippets
 - Correct comment tags (make work this: "'flkd\'dkfdl\'df fd'")
 - Search for bugs and fix them
 - Add some themes
->
+
 To use it just `jii.highlighter(document.getElementsByTagName('pre'), {});`
 You can also pass any CSS param as second arguments.
-Example:
+
+####Example:
 ```javascript
 jii.highlighter(document.getElementsByTagName('pre'), {
   'font-size': '13px',
