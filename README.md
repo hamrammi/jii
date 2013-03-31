@@ -10,7 +10,7 @@ Growing library that adds some helpful methods for you pleasure.
 - Add much more methods to make functional programming better
 - Find and fix bugs
 - Make stable release as soon as possible
-_________________________________________
+>
 Some examples:
 ```javascript
 jii({ a: 'foo', b: { c: 'bar', d: 'baz' }, e: { f: { g: { h: true } } } }).has({ e: { f: { g: { h: true } } } }); // true
@@ -25,7 +25,7 @@ Emulates "class system". Makes work with OOP in JavaScript much better.
 ###Milestone:
 - Private members and variables (is it possible?)
 - Correct constructor property
-______________________________
+>
 Examples:
 ```javascript
 var Parent = Class.create({
@@ -45,7 +45,8 @@ var homer = new Parent('Homer Simpson');
 var bart = new Child('Bart Simpson');
 homer.sayHello(); // Homer Simpson says hello
 bart.sayGoodBye(); // Bart Simpson says goodbye
-homer.sayHello(); // throws an error```
+homer.sayHello(); // throws an error
+```
 
 ##jii.highlighter.js
 Simple tool to highlight code snippets
@@ -55,7 +56,7 @@ Simple tool to highlight code snippets
 - Correct comment tags (make work this: "'flkd\'dkfdl\'df fd'")
 - Search for bugs and fix them
 - Add some themes
-______________________________________
+>
 To use it just `jii.highlighter(document.getElementsByTagName('pre'), {});`
 You can also pass any CSS param as second arguments.
 Example:
@@ -63,4 +64,6 @@ Example:
 jii.highlighter(document.getElementsByTagName('pre'), {
   'font-size': '13px',
   'background-color': '#ccc'
-});``` sets default font to 13px and background color to grey.
+});
+```
+sets default font to 13px and background color to grey.
