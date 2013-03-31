@@ -4,7 +4,7 @@ ________________________________________________________________________________
 *Documentation is coming soon. (Site is under work now)*
 
 ##jii.js
-Growing library that adds some helpful methods for you pleasure.
+Growing library that adds some helpful methods for your pleasure.
 
 ###Milestone:
 - Add much more methods to make functional programming better
@@ -13,9 +13,13 @@ Growing library that adds some helpful methods for you pleasure.
 
 ####Some examples:
 ```javascript
-jii({ a: 'foo', b: { c: 'bar', d: 'baz' }, e: { f: { g: { h: true } } } }).has({ e: { f: { g: { h: true } } } }); // true
-jii.isEqual({ a: 'foo', b: { c: [function() { return 'bar' }] } }, { a: 'foo', b: { c: [function() { return 'bar' }] } }); // true
-jii.has([{ i: {} }, { a: 'foo', b: { c: [function() { return 'bar' }] } }, ['foo', 'bar', 'baz']], { a: 'foo', b: { c: [function() { return 'bar' }] } }); // true
+var a = { a: 'foo', b: { c: 'bar', d: 'baz' }, e: { f: { g: { h: true } } } };
+jii(a).has({ e: { f: { g: { h: true } } } }); // true
+var b = { a: 'foo', b: { c: [function() { return 'bar' }] } };
+jii.isEqual(b, { a: 'foo', b: { c: [function() { return 'bar' }] } }); // true
+var c = [{ i: {} }, { a: 'foo', b: { c: [function() { return 'bar' }] } }, ['foo', 'bar', 'baz']];
+jii.has(c, { a: 'foo', b: { c: [function() { return 'bar' }] } }); // true
+jii.has(c, { a: 'foo', b: { c: [function() { return 'bara' }] } }); // false
 jii('Gandalf').begin().endsWith(3).capitalize().end(); // Alf
 ```
 
