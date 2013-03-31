@@ -1,14 +1,15 @@
 /**
  * jii.js library
  *
- * Helper library that makes work with javascript even better
+ * Helper library that makes work with javascript even better,
+ * adds some awesome sugar with Ruby and Python flavour
  *
  * @author: hamrammi@gmail.com
  */
 (function() {
   'use strict';
 
-  var VERSION = '0.3.11';
+  var VERSION = '0.4.2';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -30,7 +31,11 @@
       objObject = '[object Object]',
       objFunction = '[object Function]',
       objBoolean = '[object Boolean]',
-      objNull = '[object Null]';
+      objNull = '[object Null]',
+      objRegExp = '[object RegExp]';
+
+  // Acts as `flag`
+  var got = false;
 
   var isArray = jii.isArray = function(obj) {
     return typeof obj === 'object' && obj !== null && Array.isArray(obj);
@@ -52,6 +57,9 @@
   };
   var isNull = jii.isNull = function(obj) {
     return toString.call(obj) === objNull;
+  };
+  var isRegExp = jii.isRegExp = function(obj) {
+    return toString.call(obj) === objRegExp;
   };
 
   var typeError = function(expected, got) {
@@ -381,23 +389,6 @@
 
   // ------------------ OBJECTS -------------------
 
-  // Check whether `a` includes `b`
-  jii.contains = function(a, b) {
-    for (var prop in b) {
-      if (b.hasOwnProperty(prop)) {
-        if (!a.hasOwnProperty(prop)) return false;
-        else if (a[prop] !== b[prop]) {
-          if ((isObject(a[prop]) && isObject(b[prop])) ||
-            (isArray(a[prop]) && isArray(b[prop]))) {
-            return jii.isEqual(a[prop], b[prop]);
-          }
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
   // Returns the length (size) of an object
   jii.size = function(obj) {
     var length = 0, key;
@@ -421,10 +412,34 @@
     return dict;
   };
 
-  // Count occurrences of all regexp characters
-  jii.count = function(obj, regexp) {
-    // TODO: this should work with String, Array, Object objects
+  // Remove duplicates
+  jii.squeeze = function(obj) {
+    var result = [];
+    if (!(isString(obj) || isArray(obj)))
+      validateType('squeeze', obj, 'string or array');
+    var _squeeze = function(el) {
+      if (!jii.has(result, el)) result.push(el);
+    };
+    jii.each(obj, _squeeze);
+    return (typeof obj === 'string') ? result.join('') : result;
+  };
 
+  // Count occurrences that match criteria
+  jii.count = function(obj, criteria, squeezeCriteria) {
+    squeezeCriteria = squeezeCriteria || false;
+    var result = 0;
+    var regExpCount = function(el) {
+      if (!isString(el)) typeError('string', typeof el);
+      if (el.match(criteria)) result++;
+    };
+    var arrayCount = function(el) {
+      var __ = function(criterion) { if (criterion === el) result++; };
+      if (squeezeCriteria) criteria = jii.squeeze(criteria);
+      jii.each(criteria, __);
+    };
+    if (isRegExp(criteria)) jii.each(obj, regExpCount);
+    if (isArray(criteria)) jii.each(obj, arrayCount);
+    return result;
   };
 
   // Retrieve each `slice` elements from an `obj`
@@ -457,23 +472,49 @@
     }
   };
 
+  // Check whether `a` includes `b`
+  var contains = function(a, b) {
+    for (var prop in b) {
+      if (b.hasOwnProperty(prop)) {
+        if (!a.hasOwnProperty(prop)) return false;
+        else if (a[prop] !== b[prop]) {
+          if ((isObject(a[prop]) && isObject(b[prop])) ||
+            (isArray(a[prop]) && isArray(b[prop]))) {
+            return jii.isEqual(a[prop], b[prop]);
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   // Check whether an `obj` has `chr`
-  jii.has = function(obj, chr) {
+  jii.has = function(obj, chr, deepScan) {
+    var got; deepScan = deepScan || false;
     switch (toString.call(obj)) {
       case objString:
         if (isString(chr)) return obj.indexOf(chr) !== -1;
         else return false; break;
       case objObject:
-        if (isObject(chr)) return jii.contains(obj, chr);
-        else return false; break;
+        if (isObject(chr)) return contains(obj, chr);
+        else return false;
       case objArray:
         if (isString(chr) || isNumber(chr) || isBoolean(chr))
           return obj.indexOf(chr) !== -1;
         var i, l = obj.length;
-        if (isObject(chr))
+        if (isObject(chr)) {
+          got = false;
           for (i = 0; i < l; i++) {
-            if (isObject(obj[i])) return jii.isEqual(obj[i], chr);
+            if (deepScan) {
+              if (isObject(obj[i]) && jii.has(obj[i], chr, deepScan))
+                got = true;
+            } else {
+              if (isObject(obj[i]) && jii.isEqual(obj[i], chr)) got = true;
+            }
           }
+          return got;
+        }
         if (isArray(chr))
           for (i = 0; i < l; i++) {
             if (isArray(obj[i])) return jii.isEqual(obj[i], chr);
