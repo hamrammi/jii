@@ -13,6 +13,7 @@
   var root = this;
 
   var arrayProto = Array.prototype,
+      stringProto = String.prototype,
       unshift = Array.prototype.unshift,
       toString = Object.prototype.toString;
 
@@ -34,7 +35,7 @@
       objNull = '[object Null]',
       objRegExp = '[object RegExp]';
 
-  // Acts as `flag`
+  // Acts as a `flag`
   var got = false;
 
   var isArray = jii.isArray = function(obj) {
@@ -62,8 +63,9 @@
     return toString.call(obj) === objRegExp;
   };
 
-  var typeError = function(expected, got) {
-    throw new TypeError('Expected "' + expected + '", but got "' + got + '".');
+  var typeError = function(expected, got, func) {
+    throw new TypeError('"jii.' + func + '": expected "' + expected + '",' +
+      ' got "' + got + '".');
   };
 
   var validateType = function(func, arg, expected) {
@@ -84,17 +86,6 @@
       case objString: break;
       case objArray: break;
       default: validateType(func, obj, 'string or array');
-    }
-    return obj;
-  };
-
-  // Make sure an `obj` is enumerable
-  var isEnumerable = function(func, obj) {
-    switch (toString.call(obj)) {
-      case objString: break;
-      case objArray: break;
-      case objObject: break;
-      default: validateType(func, obj, 'enumerable');
     }
     return obj;
   };
@@ -171,17 +162,17 @@
       } else if (typeof value === 'number') {
         return string.slice(string.length - value);
       } else {
-        typeError('string or number', typeof value);
+        typeError('string or number', typeof value, 'endsWith');
       }
     } else if (value && caseInsensitive) {
       if (typeof value === 'number') {
-        typeError('string', 'number');
+        typeError('string', 'number', 'endsWith');
       } else if (typeof value === 'string') {
         length = value.length;
         var lowerCased = string.slice(string.length - length).toLowerCase();
         return lowerCased === value.toLowerCase();
       } else {
-        typeError('string', typeof value);
+        typeError('string', typeof value, 'endsWith');
       }
     }
     return string.charAt(length - 1);
@@ -200,16 +191,16 @@
       } else if (typeof value === 'number') {
         return string.slice(0, value);
       } else {
-        typeError('string or number', typeof value);
+        typeError('string or number', typeof value, 'startsWith');
       }
     } else if (value && caseInsensitive) {
       if (typeof value === 'number') {
-        typeError('string', 'number');
+        typeError('string', 'number', 'startsWith');
       } else if (typeof value === 'string') {
         length = value.length;
         return string.slice(0, length).toLowerCase() === value.toLowerCase();
       } else {
-        typeError('string', typeof value);
+        typeError('string', typeof value, 'startsWith');
       }
     }
     return string.charAt(0);
@@ -289,7 +280,8 @@
         var type = toString.call(value);
         if (type === objNumber) {
           for (i = 0; i < l; i++) {
-            if (typeof obj[i] !== 'number') typeError('number', typeof obj[i]);
+            if (typeof obj[i] !== 'number')
+              typeError('number', typeof obj[i], 'core::value');
             if (what === 'max') value = value > obj[i] ? value : obj[i];
             if (what === 'min') value = value < obj[i] ? value : obj[i];
           }
@@ -299,7 +291,7 @@
       case objString:
         words = jii.trim(obj, 'full').split(' '); l = words.length;
         return _result(words, what); break;
-      default: typeError('string or array', typeof obj);
+      default: typeError('string or array', typeof obj, 'core::value');
     }
     return value;
   };
@@ -319,7 +311,8 @@
   jii.min = function(array) { return value(array, 'min'); };
 
   jii.zip = function(a, b) {
-    if (!isArray(a) || !isArray(b)) typeError('array', [typeof a, typeof b]);
+    if (!isArray(a) || !isArray(b))
+      typeError('array', [typeof a, typeof b], 'zip');
     if (a.length !== b.length)
       throw new Error('jii.zip: arrays are not the same length');
     var result = [];
@@ -343,7 +336,7 @@
 
   // Check whether an object has chain of properties
   jii.hasChain = function(obj, chain, cb) {
-    if (!isObject(obj)) typeError('object', typeof obj);
+    if (!isObject(obj)) typeError('object', typeof obj, 'hasChain');
     chain = validateType('hasChain', chain, 'string');
     cb = cb || null;
     // Keys to be evaluated
@@ -369,7 +362,7 @@
 
   // Select elements that meet the condition
   jii.select = function(array, selector) {
-    if (!isArray(array)) typeError('array', typeof array);
+    if (!isArray(array)) typeError('array', typeof array, 'select');
     var result = [];
     jii.map(array, function(x) {
       if (selector(x) === true) result.push(x);
@@ -379,12 +372,61 @@
 
   // Reject elements that meet the condition
   jii.reject = function(array, rejector) {
-    if (!isArray(array)) typeError('array', typeof array);
+    if (!isArray(array)) typeError('array', typeof array, 'reject');
     var result = [];
     jii.map(array, function(x) {
       if (rejector(x) === false) result.push(x);
     });
     return result;
+  };
+
+  // Flatten an array. Can flatten only with `depth` level
+  jii.flatten = function(array, depth) {
+    if (!isArray(array)) typeError('array', typeof array, 'flatten');
+    depth = depth || null;
+    var result = [], depthCounter = 0;
+    var flatten = function(chr) {
+      if (isArray(chr)) {
+        depthCounter++;
+        if (!depth || (depth && depth >= depthCounter)) {
+          jii(chr).map(flatten); depthCounter = 0;
+        } else result.push(chr);
+      } else result.push(chr);
+    };
+    jii(array).map(flatten);
+    return result;
+  };
+
+  // Core reduce functionality
+  jii.reduce = function(array, iterator, initialValue, context) {
+    if (!isArray(array)) typeError('array', typeof array, 'reduce');
+    if (arrayProto.reduce) {
+      if (!initialValue) return array.reduce(iterator);
+      else return array.reduce(iterator, initialValue);
+    }
+    var value, isValueSet = (initialValue) ? true : false;
+    if (isValueSet) value = initialValue;
+    var reduce = function(el, index, arr) {
+      if (isValueSet) value = iterator.call(context, value, el, index, arr);
+      else { value = el; isValueSet = true; }
+    };
+    jii.each(array, reduce);
+    if (!value) throw new Error('Reduce of empty array with no initial value');
+    return value;
+  };
+
+  // Summarize all elements of the array
+  jii.sum = function(array) {
+    if (!isArray(array)) typeError('array', typeof array, 'sum');
+    var sum = function(sum, chr) { return sum + chr; };
+    return jii.reduce(array, sum);
+  };
+
+  // Multiply all elements of the array
+  jii.multiply = function(array) {
+    if (!isArray(array)) typeError('array', typeof array, 'multiply');
+    var mulitply = function(multi, chr) { return multi * chr; };
+    return jii.reduce(array, mulitply);
   };
 
   // ------------------ OBJECTS -------------------
@@ -429,7 +471,7 @@
     squeezeCriteria = squeezeCriteria || false;
     var result = 0;
     var regExpCount = function(el) {
-      if (!isString(el)) typeError('string', typeof el);
+      if (!isString(el)) typeError('string', typeof el, 'count');
       if (el.match(criteria)) result++;
     };
     var arrayCount = function(el) {
@@ -444,12 +486,50 @@
 
   // Retrieve each `slice` elements from an `obj`
   jii.eachSlice = function(obj, slice) {
-    // TODO: this should work with String, Array, Object objects
+    obj = isStringOrArray('eachSlice', obj);
+    var result = [], length = obj.length, index = 0;
+    var count = Math.floor(length / slice) + 1;
+    if (slice <= 0) throw new Error('number should be positive');
+    if (slice === length) count--;
+    if (slice > length) slice = length;
+    while (count--) {
+      result.push(obj.slice(index, index + slice)); index += slice;
+    }
+    return result;
   };
 
   // Similar to jii.eachSlice() method but with some changes:
   // jii.eachCons([1, 2, 3, 4, 5]) => [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
-  jii.eachCons = function(obj, slice) {};
+  jii.eachCons = function(obj, slice) {
+    obj = isStringOrArray('eachCons', obj);
+    var result = [], length = obj.length, index = 0;
+    if (slice <= 0) throw new Error('number should be positive');
+    if (slice > length) slice = length;
+    while (index + slice <= length) {
+      result.push(obj.slice(index, index + slice)); index++;
+    }
+    return result;
+  };
+
+  // Drop first n elements from array and return rest
+  jii.dropFirst = function(obj, number) {
+    if (number <= 0) throw new Error('number should be positive');
+    switch (toString.call(obj)) {
+      case objString: return stringProto.slice.call(obj, number); break;
+      case objArray: return arrayProto.slice.call(obj, number); break;
+      default: return typeError('string or array', typeof obj, 'dropFirst');
+    }
+  };
+
+  // Drop last n elements from array and return rest
+  jii.dropLast = function(obj, number) {
+    if (number <= 0) throw new Error('number should be positive');
+    switch (toString.call(obj)) {
+      case objString: return stringProto.slice.call(obj, 0, -number); break;
+      case objArray: return arrayProto.slice.call(obj, 0, -number); break;
+      default: return typeError('string or array', typeof obj, 'dropFirst');
+    }
+  };
 
   // Basic function to walk through arrays.
   // Iterator function takes 3 arguments (element, index, array)
@@ -555,7 +635,7 @@
         break;
       case objArray:
         result = jii.map(obj, mutator, context); break;
-      default: typeError('string or array', typeof obj);
+      default: typeError('string or array', typeof obj, 'walk');
     }
     return result;
   };
@@ -602,7 +682,7 @@
   // Helper function to extend `wrapper` prototype
   var extendWrapperPrototype = function(name, func) {
     Wrapper.prototype[name] = function() {
-      // Add `this._wrapped` as a first element to `arguments` array
+      // Add `this._wrapped` as a first element to `arguments`
       unshift.call(arguments, this._wrapped);
       return result(func.apply(jii, arguments), this._chain);
     };
