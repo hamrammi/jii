@@ -1,15 +1,15 @@
 /**
  * jii.js library
  *
- * Helper library that makes work with javascript even better,
- * adds some awesome sugar with Ruby and Python flavour
+ * Helper library that makes work with javascript even better.
+ * Adds some awesome sugar with Ruby and Python flavour.
  *
  * @author: hamrammi@gmail.com
  */
 (function() {
   'use strict';
 
-  var VERSION = '0.4.2';
+  var VERSION = '0.5.1';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -328,9 +328,10 @@
     if (arrayProto.map) {
       return obj.map(iterator, context);
     }
-    for (var i = 0, l = obj.length; i < l; i++) {
-      result[i] = iterator.call(context, obj[i]);
-    }
+    var map = function(el, index, obj) {
+      result[index] = iterator.call(context, el, index, obj);
+    };
+    jii.each(obj, map);
     return result;
   };
 
@@ -429,6 +430,34 @@
     return jii.reduce(array, mulitply);
   };
 
+  // Test if all elements of an array match criteria
+  jii.all = jii.every = function(array, comparator, context) {
+    if (arrayProto.every) {
+      return array.every(comparator, context);
+    }
+    var value = true, index = array.length;
+    while (index--) {
+      if (!comparator.call(context, array[index], index, array)) {
+        value = false; break;
+      }
+    }
+    return value;
+  };
+
+  // Test if any elements of an array match criteria
+  jii.any = jii.some = function(array, comparator, context) {
+    if (arrayProto.some) {
+      return array.some(comparator, context);
+    }
+    var value = false, index = array.length;
+    while (index--) {
+      if (comparator.call(context, array[index], index, array)) {
+        value = true; break;
+      }
+    }
+    return value;
+  };
+
   // ------------------ OBJECTS -------------------
 
   // Returns the length (size) of an object
@@ -511,7 +540,7 @@
     return result;
   };
 
-  // Drop first n elements from array and return rest
+  // Drop first n elements from an array and return the rest
   jii.dropFirst = function(obj, number) {
     if (number <= 0) throw new Error('number should be positive');
     switch (toString.call(obj)) {
@@ -521,7 +550,7 @@
     }
   };
 
-  // Drop last n elements from array and return rest
+  // Drop last n elements from an array and return the rest
   jii.dropLast = function(obj, number) {
     if (number <= 0) throw new Error('number should be positive');
     switch (toString.call(obj)) {
@@ -704,6 +733,6 @@
 
   Wrapper.prototype.end = function() { return this._wrapped; };
 
-  // Expose `jii` as global variable
+  // Expose `jii` as a global variable
   root.jii = jii;
 }).call(this);
