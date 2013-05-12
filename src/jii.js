@@ -362,7 +362,7 @@
   };
 
   // Select elements that meet the condition
-  jii.select = function(array, selector) {
+  jii.select = jii.filter = function(array, selector) {
     if (!isArray(array)) typeError('array', typeof array, 'select');
     var result = [];
     jii.map(array, function(x) {
@@ -432,6 +432,7 @@
 
   // Test if all elements of an array match criteria
   jii.all = jii.every = function(array, comparator, context) {
+    if (!isArray(array)) typeError('array', typeof array, 'all(every)');
     if (arrayProto.every) {
       return array.every(comparator, context);
     }
@@ -446,6 +447,7 @@
 
   // Test if any elements of an array match criteria
   jii.any = jii.some = function(array, comparator, context) {
+    if (!isArray(array)) typeError('array', typeof array, 'any(some)');
     if (arrayProto.some) {
       return array.some(comparator, context);
     }
@@ -484,20 +486,20 @@
   };
 
   // Remove duplicates
-  jii.squeeze = function(obj) {
+  jii.uniq = function(obj) {
     var result = [];
     if (!(isString(obj) || isArray(obj)))
-      validateType('squeeze', obj, 'string or array');
-    var _squeeze = function(el) {
+      validateType('uniq', obj, 'string or array');
+    var _uniq = function(el) {
       if (!jii.has(result, el)) result.push(el);
     };
-    jii.each(obj, _squeeze);
+    jii.each(obj, _uniq);
     return (typeof obj === 'string') ? result.join('') : result;
   };
 
   // Count occurrences that match criteria
-  jii.count = function(obj, criteria, squeezeCriteria) {
-    squeezeCriteria = squeezeCriteria || false;
+  jii.count = function(obj, criteria, uniqCriteria) {
+    uniqCriteria = uniqCriteria || false;
     var result = 0;
     var regExpCount = function(el) {
       if (!isString(el)) typeError('string', typeof el, 'count');
@@ -505,7 +507,7 @@
     };
     var arrayCount = function(el) {
       var __ = function(criterion) { if (criterion === el) result++; };
-      if (squeezeCriteria) criteria = jii.squeeze(criteria);
+      if (uniqCriteria) criteria = jii.uniq(criteria);
       jii.each(criteria, __);
     };
     if (isRegExp(criteria)) jii.each(obj, regExpCount);
@@ -558,6 +560,12 @@
       case objArray: return arrayProto.slice.call(obj, 0, -number); break;
       default: return typeError('string or array', typeof obj, 'dropFirst');
     }
+  };
+
+  // Remove all falsy values from an array
+  jii.compact = function(obj) {
+    var _compact = function(x) { return !!x };
+    return jii.select(obj, _compact);
   };
 
   // Basic function to walk through arrays.
@@ -682,6 +690,46 @@
   };
 
   // -------------------- SYSTEM --------------------
+
+  // Prototype native objects with jii methods
+  jii.proto = function() {
+    var STRING = ['capitalize', 'swapCase', 'isUpperCased', 'isLowerCased',
+      'toUnicode', 'toCharCode', 'endsWith', 'startsWith', 'positions',
+      'reverse', 'trim', 'title'];
+    var ENUMS = ['occurrences', 'uniq', 'count', 'eachSlice', 'eachCons',
+      'dropFirst', 'dropLast', 'each', 'has', 'in', 'walk'];
+    var ARRAY = ['similar', 'min', 'max', 'zip', 'map', 'hasChain', 'select',
+      'reject', 'flatten', 'reduce', 'sum', 'multiply', 'all', 'every',
+      'any', 'some', 'filter', 'compact'];
+    var OBJECT = ['size', 'count', 'each', 'has', 'in'];
+    var stringExtender = function(method) {
+      if (!stringProto[method]) {
+        stringProto[method] = function() {
+          unshift.call(arguments, this);
+          return jii[method].apply(jii, arguments);
+        };
+      }
+    };
+    var arrayExtender = function(method) {
+      if (!arrayProto[method]) {
+        arrayProto[method] = function() {
+          unshift.call(arguments, this);
+          return jii[method].apply(jii, arguments);
+        };
+      }
+    };
+    var objectExtender = function(method) {
+      if (!Object.prototype[method]) {
+        Object.prototype[method] = function() {
+          unshift.call(arguments, this);
+          return jii[method].apply(jii, arguments);
+        };
+      }
+    };
+    jii.each(STRING, stringExtender); jii.each(ENUMS, stringExtender);
+    jii.each(ARRAY, arrayExtender); jii.each(ENUMS, arrayExtender);
+    jii.each(OBJECT, objectExtender);
+  };
 
   jii.begin = function() {
     Wrapper._chain = true;
