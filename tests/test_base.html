@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test base `jii` methods with `Jasmine`</title>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="../src/jii.js"></script>
+  <link rel="stylesheet" type="text/css" href="jasmine/jasmine.css">
+  <script type="text/javascript" src="jasmine/jasmine.js"></script>
+  <script type="text/javascript" src="jasmine/jasmine-html.js"></script>
+
+  <script type="text/javascript">
+
+    describe('jii.capitalize', function() {
+      it('should return capitalized string', function() {
+        expect(jii.capitalize('nemo')).toBe('Nemo');
+      });
+
+      it('should return four capitalized letters', function() {
+        expect(jii.capitalize('squirrel', 4)).toBe('SQUIrrel');
+      });
+    });
+
+    describe('jii.swapCase', function() {
+      it('should return string with swapped letter cases', function() {
+        expect(jii.swapCase('NoRtH')).toBe('nOrTh');
+      });
+    });
+
+    describe('jii.isUpperCased', function() {
+      it('should report that string is uppercased', function() {
+        expect(jii.isUpperCased('GOLLUM')).toBe(true);
+      });
+
+      it('should report that string is not uppercased', function() {
+        expect(jii.isUpperCased('Gollum')).toBe(false);
+      });
+    });
+
+    describe('jii.isLowerCased', function() {
+      it('should report that string is uppercased', function() {
+        expect(jii.isLowerCased('gOllUm')).toBe(false);
+      });
+
+      it('should report that string is not uppercased', function() {
+        expect(jii.isLowerCased('gollum')).toBe(true);
+      });
+    });
+
+//    describe('jii.toUnicode', function() {
+//      it('should transform string to unicode format', function() {
+//        expect(jii.toUnicode('Mordor')).('\u004d\u006f\u0072\u0064\u006f\u0072');
+//      });
+//    });
+//
+//    describe('jii.toCharCode', function() {
+//      it('should transform letters of string to char codes', function() {
+//        expect(jii.toCharCode('Mordor')).toEqual("\x4d\x6f\x72\x64\x6f\x72");
+//      });
+//    });
+
+    describe('jii.endsWith', function() {
+      it('should return last letter `d` of the word `wind`', function() {
+        expect(jii.endsWith('wind')).toBe('d');
+      });
+
+      it('should return last 4 letters `ic` of the word `magic`', function() {
+        expect(jii.endsWith('magic', 4)).toBe('agic');
+      });
+
+      it('should throw an exception', function() {
+        expect(function() { jii.endsWith('magic', 7); }).toThrow(
+            Error('"jii.endsWith" says: "string length exceeded"')
+        );
+      });
+
+      it('should throw an exception', function() {
+        expect(function() { jii.endsWith('magic', 3, true); }).toThrow(
+            Error('"jii.endsWith": expected "string", got "number"')
+        );
+      });
+
+      it('should check that `mystery` ends with `ery`', function() {
+        expect(jii.endsWith('mystery', 'ery')).toBe(true);
+      });
+
+      it('should check that `mystery` does not end with `very`', function() {
+        expect(jii.endsWith('mystery', 'very')).toBe(false);
+      });
+
+      it('should check that `mystery` does not end with `Ery`', function() {
+        expect(jii.endsWith('mystery', 'Ery')).toBe(false);
+      });
+
+      it('should check that `mystery` ends with `ErY` with `caseInsensitive` argument', function() {
+        expect(jii.endsWith('mystery', 'ErY', true)).toBe(true);
+      });
+    });
+
+    describe('jii.startsWith', function() {
+      it('should return first letter `w` of the word `wind`', function() {
+        expect(jii.startsWith('wind')).toBe('w');
+      });
+
+      it('should return first 4 letters `magi` of the word `magic`', function() {
+        expect(jii.startsWith('magic', 4)).toBe('magi');
+      });
+
+      it('should throw an exception', function() {
+        expect(function() { jii.startsWith('magic', 7); }).toThrow(
+            Error('"jii.startsWith" says: "string length exceeded"')
+        );
+      });
+
+      it('should throw an exception', function() {
+        expect(function() { jii.startsWith('magic', 3, true); }).toThrow(
+            Error('"jii.startsWith": expected "string", got "number"')
+        );
+      });
+
+      it('should check that `mystery` starts with `myst`', function() {
+        expect(jii.startsWith('mystery', 'myst')).toBe(true);
+      });
+
+      it('should check that `Mystery` starts with `Myst`', function() {
+        expect(jii.startsWith('Mystery', 'Myst')).toBe(true);
+      });
+
+      it('should check that `mystery` does not start with `lyst`', function() {
+        expect(jii.startsWith('mystery', 'lyst')).toBe(false);
+      });
+
+      it('should check that `mystery` does not start with `Myst`', function() {
+        expect(jii.startsWith('mystery', 'Myst')).toBe(false);
+      });
+
+      it('should check that `mystery` starts with `MySt` with `caseInsensitive` argument', function() {
+        expect(jii.startsWith('mystery', 'MySt', true)).toBe(true);
+      });
+    });
+
+    (function() {
+      var jasmineEnv = jasmine.getEnv();
+      jasmineEnv.updateInterval = 250;
+
+      var htmlReporter = new jasmine.HtmlReporter();
+      jasmineEnv.addReporter(htmlReporter);
+
+      jasmineEnv.specFilter = function(spec) {
+        return htmlReporter.specFilter(spec);
+      };
+
+      var currentWindowOnload = window.onload;
+      window.onload = function() {
+        if (currentWindowOnload) {
+          currentWindowOnload();
+        }
+        execJasmine();
+      };
+
+      function execJasmine() {
+        jasmineEnv.execute();
+      }
+    })();
+
+  </script>
+</head>
+<body>
+</body>
+</html>
