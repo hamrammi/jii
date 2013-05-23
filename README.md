@@ -21,6 +21,7 @@ var c = [{ i: {} }, { a: 'foo', b: { c: [function() { return 'bar' }] } }, ['foo
 jii.has(c, { a: 'foo', b: { c: [function() { return 'bar' }] } }); // true
 jii.has(c, { a: 'foo', b: { c: [function() { return 'bara' }] } }); // false
 jii('Gandalf').begin().endsWith(3).capitalize().end(); // Alf
+jii.flatten([-1, [2, [[3, 2, 1, [['a', [[function() {}, ['c', 4, [[false, [['c', ['r', 'd']]], 'b', ]]], 3]]], 2], 34], 'e'], 3], true])
 ```
 
 ##jii.class.js

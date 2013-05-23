@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.5.1';
+  var VERSION = '0.5.3';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -630,15 +630,18 @@
               if (isObject(obj[i]) && jii.has(obj[i], chr, deepScan))
                 got = true;
             } else {
-              if (isObject(obj[i]) && jii.isEqual(obj[i], chr)) got = true;
+              if (/*isObject(obj[i]) && */jii.isEqual(obj[i], chr)) got = true;
             }
           }
           return got;
         }
-        if (isArray(chr))
+        if (isArray(chr)) {
+          got = false;
           for (i = 0; i < l; i++) {
-            if (isArray(obj[i])) return jii.isEqual(obj[i], chr);
+            if (jii.isEqual(obj[i], chr)) { got = true; break; }
           }
+          return got;
+        }
         return false; break;
       default: return validateType('has', obj, 'string or array or object');
     }
