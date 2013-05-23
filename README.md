@@ -63,7 +63,7 @@ Simple tool to highlight code snippets
 - Add some themes
 
 To use it just `jii.highlighter(document.getElementsByTagName('pre'), {});`
-You can also pass any CSS param as second arguments.
+You can also pass any CSS param as second argument.
 
 ####Example:
 ```javascript
