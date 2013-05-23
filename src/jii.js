@@ -1,8 +1,8 @@
 /**
  * jii.js library
  *
- * Helper library that makes work with javascript even better.
  * Adds some awesome sugar with Ruby and Python flavour.
+ * Functional programming should be more fun.
  *
  * @author: hamrammi@gmail.com
  */
@@ -362,21 +362,24 @@
   };
 
   // Select elements that meet the condition
-  jii.select = jii.filter = function(array, selector) {
+  jii.select = jii.filter = function(array, selector, context) {
     if (!isArray(array)) typeError('array', typeof array, 'select');
+    if (arrayProto.filter) {
+      return array.filter(selector, context);
+    }
     var result = [];
     jii.map(array, function(x) {
-      if (selector(x) === true) result.push(x);
+      if (selector.call(context, x) === true) result.push(x);
     });
     return result;
   };
 
   // Reject elements that meet the condition
-  jii.reject = function(array, rejector) {
+  jii.reject = function(array, rejector, context) {
     if (!isArray(array)) typeError('array', typeof array, 'reject');
     var result = [];
     jii.map(array, function(x) {
-      if (rejector(x) === false) result.push(x);
+      if (rejector.call(context, x) === false) result.push(x);
     });
     return result;
   };
@@ -731,11 +734,6 @@
     jii.each(OBJECT, objectExtender);
   };
 
-  jii.begin = function() {
-    Wrapper._chain = true;
-    return this;
-  };
-
   // Extend `jii` with user methods
   jii.extend = function(obj) {
     for (var i in obj) {
@@ -779,7 +777,7 @@
     return this;
   };
 
-  Wrapper.prototype.end = function() { return this._wrapped; };
+  Wrapper.prototype['end'] = function() { return this._wrapped; };
 
   // Expose `jii` as a global variable
   root.jii = jii;
