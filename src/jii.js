@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.5.3';
+  var VERSION = '0.6.0';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -33,7 +33,8 @@
       objFunction = '[object Function]',
       objBoolean = '[object Boolean]',
       objNull = '[object Null]',
-      objRegExp = '[object RegExp]';
+      objRegExp = '[object RegExp]',
+      objGlobal = '[object global]';
 
   // Acts as a `flag`
   var got = false;
@@ -62,10 +63,17 @@
   var isRegExp = jii.isRegExp = function(obj) {
     return toString.call(obj) === objRegExp;
   };
+  var isGlobal = jii.isGlobal = function(obj) {
+    return toString.call(obj) === objGlobal;
+  };
 
   var typeError = function(expected, got, func) {
     throw new TypeError('"jii.' + func + '": expected "' + expected + '",' +
-      ' got "' + got + '".');
+      ' got "' + got + '"');
+  };
+
+  var error = function(func, message) {
+    throw new Error('"jii.' + func + '" says: "' + message + '"');
   };
 
   var validateType = function(func, arg, expected) {
@@ -160,6 +168,7 @@
         length = value.length;
         return string.slice(string.length - length) === value;
       } else if (typeof value === 'number') {
+        if (value > string.length) error('endsWith', 'string length exceeded');
         return string.slice(string.length - value);
       } else {
         typeError('string or number', typeof value, 'endsWith');
@@ -189,6 +198,8 @@
         length = value.length;
         return string.slice(0, length) === value;
       } else if (typeof value === 'number') {
+        if (value > string.length)
+          error('startsWith', 'string length exceeded');
         return string.slice(0, value);
       } else {
         typeError('string or number', typeof value, 'startsWith');
@@ -298,10 +309,13 @@
 
   // Compares similar arrays [1, 2, 3, 4] == [3, 4, 2, 1]
   jii.similar = function(a, b) {
-    for (var i = 0, l = a.length; i < l; i++) {
-      if (!jii.has(b, a[i])) return false;
+    if (!isArray(a)) typeError('array', typeof a, 'similar');
+    var i, similar = true, l = a.length;
+    if (l !== b.length) return false;
+    for (i = 0; i < l; i++) {
+      if (!jii.has(b, a[i])) { similar = false; break; }
     }
-    return true;
+    return similar;
   };
 
   // Max value of an array
@@ -463,6 +477,17 @@
     return value;
   };
 
+  // Permutations
+  jii.permutation = function(array, length) {
+    if (!isArray(array)) typeError('array', typeof array, 'permutation');
+    var l = array.length;
+    length = length || l;
+    if (length > l) throw new Error('No permutations with length ' + length);
+    var result = [];
+
+    return result;
+  };
+
   // ------------------ OBJECTS -------------------
 
   // Returns the length (size) of an object
@@ -594,24 +619,21 @@
 
   // Check whether `a` includes `b`
   var contains = function(a, b) {
-    for (var prop in b) {
+    var prop, contains = true;
+    for (prop in b) {
       if (b.hasOwnProperty(prop)) {
         if (!a.hasOwnProperty(prop)) return false;
         else if (a[prop] !== b[prop]) {
-          if ((isObject(a[prop]) && isObject(b[prop])) ||
-            (isArray(a[prop]) && isArray(b[prop]))) {
-            return jii.isEqual(a[prop], b[prop]);
-          }
-          return false;
+          if (!jii.isEqual(a[prop], b[prop])) contains = false;
         }
       }
     }
-    return true;
+    return contains;
   };
 
   // Check whether an `obj` has `chr`
   jii.has = function(obj, chr, deepScan) {
-    var got; deepScan = deepScan || false;
+    var has; deepScan = deepScan || false;
     switch (toString.call(obj)) {
       case objString:
         if (isString(chr)) return obj.indexOf(chr) !== -1;
@@ -622,26 +644,20 @@
       case objArray:
         if (isString(chr) || isNumber(chr) || isBoolean(chr))
           return obj.indexOf(chr) !== -1;
-        var i, l = obj.length;
-        if (isObject(chr)) {
-          got = false;
+        var seeker = function() {
+          var i, l = obj.length; has = false;
           for (i = 0; i < l; i++) {
+            if (has) break;
             if (deepScan) {
               if (isObject(obj[i]) && jii.has(obj[i], chr, deepScan))
-                got = true;
+                has = true;
             } else {
-              if (/*isObject(obj[i]) && */jii.isEqual(obj[i], chr)) got = true;
+              if (jii.isEqual(obj[i], chr)) has = true;
             }
           }
-          return got;
-        }
-        if (isArray(chr)) {
-          got = false;
-          for (i = 0; i < l; i++) {
-            if (jii.isEqual(obj[i], chr)) { got = true; break; }
-          }
-          return got;
-        }
+          return has;
+        };
+        if (isArray(chr) || isObject(chr) || isFunction(chr)) return seeker();
         return false; break;
       default: return validateType('has', obj, 'string or array or object');
     }
@@ -653,7 +669,7 @@
   // Compares two objects
   jii.isEqual = function(a, b) {
     if (toString.call(a) !== toString.call(b)) return false;
-    if (typeof a === 'undefined' || isNull(a)) return false;
+    if (isGlobal(a)) return true;
     if (isObject(a)) {
       return jii.size(a) === jii.size(b) ? jii.has(a, b) : false;
     } else if (isArray(a)) {
