@@ -138,6 +138,126 @@
       });
     });
 
+    describe('jii.positions', function() {
+      it('should return array of indexes of letter `a` in the word `Malachai`', function() {
+        expect(jii.positions('Malachai', 'a')).toEqual([1, 3, 6]);
+      });
+
+      it('should return empty array since there is no letter `o` in the word `Malachai`', function() {
+        expect(jii.positions('Malachai', 'o')).toEqual([]);
+      });
+    });
+
+    describe('jii.reverse', function() {
+      it('should return reversed string', function() {
+        expect(jii.reverse('Morgoth')).toBe('htogroM');
+        expect(jii.reverse('MorgoTh')).toBe('hTogroM');
+        expect(jii.reverse('MoRgoTh')).toBe('hTogRoM');
+      });
+    });
+
+    describe('jii.trim', function() {
+      it('should trim left space(s)', function() {
+        expect(jii.trim(' On the left', 'left')).toBe('On the left');
+        expect(jii.trim('          On the left', 'left')).toBe('On the left');
+      });
+
+      it('should trim right space(s)', function() {
+        expect(jii.trim(' On the right    ', 'right')).toBe(' On the right');
+        expect(jii.trim('On the right       ', 'right')).toBe('On the right');
+      });
+
+      it('should trim left and right space(s)', function() {
+        expect(jii.trim('  Both  ')).toBe('Both');
+        expect(jii.trim('       Both sides   ')).toBe('Both sides');
+        expect(jii.trim('     Both  sides   ')).toBe('Both  sides');
+      });
+
+      it('should trim both left and right space(s) and leave only one space between words', function() {
+        expect(jii.trim('   One two   three    ', 'full')).toBe('One two three');
+        expect(jii.trim('   One two   three    ', 'full')).not.toBe('One   two three');
+      });
+    });
+
+    describe('jii.title', function() {
+      it('should capitalize each word in a string', function() {
+        expect(jii.title('a new hope')).toBe('A New Hope');
+      });
+    });
+
+    describe('jii.similar', function() {
+      it('should report that arrays are similar', function() {
+        expect(jii.similar([1, 2, 3, 4], [4, 3, 2, 1])).toBe(true);
+        expect(jii.similar([4, 2, 1, 4], [2, 3, 4, 1])).toBe(true);
+        expect(jii.similar(
+            [{ a: 'foo', b: function() {} }, true, [], this],
+            [true, this, { a: 'foo', b: function() {} }, []]
+        )).toBe(true);
+        expect(jii.similar(
+            [
+              { a: 'foo', m: { null: undefined },
+                b: function() {},
+                c: [
+                  { null: null, r: [undefined, [['foo']], 'this'] },
+                  [[[[[[[[[1, [[[true, [[, function() { return true; }, [[[[[[[], undefined]]]]]], 'u']]]]]]]]]]]]]]
+                ]
+              },
+              true,
+              [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
+              this
+            ],
+            [
+              { a: 'foo', m: { null: undefined },
+                b: function() {},
+                c: [
+                  { null: null, r: [undefined, [['foo']], 'this'] },
+                  [[[[[[[[[1, [[[true, [[, function() { return true; }, [[[[[[[], undefined]]]]]], 'u']]]]]]]]]]]]]]
+                ]
+              },
+              true,
+              [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
+              this
+            ]
+        )).toBe(true);
+        expect(jii.similar(
+            [
+              { a: 'foo', m: { null: undefined },
+                b: function() {},
+                c: [
+                  { b: 'b' },
+                  [1, 2, [[[[4]]]]]
+                ]
+              },
+              true,
+              [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
+              this
+            ],
+            [
+              { a: 'foo', m: { null: undefined },
+                b: function() {},
+                c: [
+                  { b: 'b' },
+                  [1, 2, [[[[4]]]]]
+                ]
+              },
+              true,
+              [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
+              this
+            ]
+        )).toBe(true);
+      });
+      it('should report that arrays are not similar', function() {
+        expect(jii.similar(
+            [true, this, {}, ['new']],
+            [this, {}, true, ['new'], { a: null }]
+        )).toBe(false);
+        expect(jii.similar(
+            [true, this, {}, ['new'], { a: null }],
+            [this, {}, true, ['new']]
+        )).toBe(false);
+      });
+    });
+
     (function() {
       var jasmineEnv = jasmine.getEnv();
       jasmineEnv.updateInterval = 250;
