@@ -258,6 +258,81 @@
       });
     });
 
+    describe('jii.max', function() {
+      it('should return max element `199`', function() {
+        expect(jii.max([4, 23, 56, 199, 32, 89])).toEqual(199);
+      });
+
+      it('should return the most long word: `Approximately`', function() {
+        expect(jii.max(['North', 'Approximately', 'Sea', 'Wolf'])).toEqual('Approximately');
+      });
+    });
+
+    describe('jii.min', function() {
+      it('should return min element `4`', function() {
+        expect(jii.min([4, 23, 56, 199, 32, 89])).toEqual(4);
+      });
+
+      it('should return the most short word: `Sea`', function() {
+        expect(jii.min(['North', 'Approximately', 'Sea', 'Wolf'])).toEqual('Sea');
+      });
+    });
+
+    describe('jii.zip', function() {
+      it('should zip two arrays', function() {
+        var a = [23, 'sd', true, 'bar', false, 564],
+            b = ['ds', 234, false, '96', undefined, 3],
+            c = [[23, 'ds'], ['sd', 234], [true, false], ['bar', '96'],
+                 [false, undefined], [564, 3]];
+        expect(jii.zip(a, b)).toEqual(c);
+      });
+    });
+
+    describe('jii.map', function() {
+      it('should map the array', function() {
+        expect(jii.map([1, 2, 3, 4], function(x) {
+          return x * x;
+        })).toEqual([1, 4, 9, 16]);
+      });
+    });
+
+    describe('jii.hasChain', function() {
+      var o = {
+        foo: {
+          bar: 'bar',
+          baz: 'baz'
+        },
+        bar: {
+          quux: {
+            bar: [true, false],
+            baz: {},
+            foo: ''
+          },
+          baz: false,
+          foo: []
+        }
+      };
+      it('should return string "bar"', function() {
+        expect(jii.hasChain(o, 'foo.bar')).toEqual('bar');
+      });
+      it('should return `false`', function() {
+        expect(jii.hasChain(o, 'bar.baz')).toEqual(false);
+      });
+      it('should return `true`', function() {
+        expect(jii.hasChain(o, 'bar.quux.baz')).toEqual({});
+      });
+      it('should return empty string', function() {
+        expect(jii.hasChain(o, 'bar.quux.foo')).toEqual('');
+      });
+      it('should check whether it is falsy or truthy`', function() {
+        expect(jii.hasChain(o, 'bar.quux.baz')).toBeTruthy();
+        expect(jii.hasChain(o, 'bar.quux.baz')).not.toBeFalsy();
+        expect(jii.hasChain(o, 'bar.foo')).toBeTruthy();
+        expect(jii.hasChain(o, 'bar.foo')).not.toBeFalsy();
+        expect(jii.hasChain(o, 'bar.quux.foo')).toBeFalsy();
+      });
+    });
+
     (function() {
       var jasmineEnv = jasmine.getEnv();
       jasmineEnv.updateInterval = 250;

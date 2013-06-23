@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.6.0';
+  var VERSION = '0.6.2';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -327,8 +327,7 @@
   jii.zip = function(a, b) {
     if (!isArray(a) || !isArray(b))
       typeError('array', [typeof a, typeof b], 'zip');
-    if (a.length !== b.length)
-      throw new Error('jii.zip: arrays are not the same length');
+    if (a.length !== b.length) error('zip', 'arrays are not the same length');
     var result = [];
     for (var i = 0, l = a.length; i < l; i++) result.push([a[i], b[i]]);
     return result;
@@ -478,13 +477,26 @@
   };
 
   // Permutations
-  jii.permutation = function(array, length) {
-    if (!isArray(array)) typeError('array', typeof array, 'permutation');
-    var l = array.length;
+  jii.permutations = function(array, length) {
+    if (!isArray(array)) typeError('array', typeof array, 'permutations');
+    var l = array.length, perm = [], result = [];
     length = length || l;
-    if (length > l) throw new Error('No permutations with length ' + length);
-    var result = [];
-
+    if (length > l)
+      error('permutations', 'no permutations with length ' + length);
+    var permutation = function(slice) {
+      var i, j, chr;
+      for (i = 0, j = slice.length; i < j; i++) {
+        chr = slice.splice(i, 1)[0]; perm.push(chr);
+        if (slice.length === 0) result.push(perm.slice());
+        permutation(slice); slice.splice(i, 0, chr); perm.pop();
+      }
+    };
+    if (length === l) {
+      permutation(array);
+    } else {
+      var slices = jii.eachCons(array, length, true);
+      jii.forEach(slices, permutation);
+    }
     return result;
   };
 
@@ -548,7 +560,7 @@
     obj = isStringOrArray('eachSlice', obj);
     var result = [], length = obj.length, index = 0;
     var count = Math.floor(length / slice) + 1;
-    if (slice <= 0) throw new Error('number should be positive');
+    if (slice <= 0) error('eachSlice', 'number should be positive');
     if (slice === length) count--;
     if (slice > length) slice = length;
     while (count--) {
@@ -559,20 +571,28 @@
 
   // Similar to jii.eachSlice() method but with some changes:
   // jii.eachCons([1, 2, 3, 4, 5]) => [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
-  jii.eachCons = function(obj, slice) {
+  jii.eachCons = function(obj, slice, more) {
     obj = isStringOrArray('eachCons', obj);
     var result = [], length = obj.length, index = 0;
-    if (slice <= 0) throw new Error('number should be positive');
+    if (slice <= 0) error('eachCons', 'number should be positive');
     if (slice > length) slice = length;
+    more = more || false;
     while (index + slice <= length) {
       result.push(obj.slice(index, index + slice)); index++;
+    }
+    if (more) {
+      while (index < length) {
+        result.push(
+          obj.slice(index).concat(obj.slice(0, slice - (length - index)))
+        ); index++;
+      }
     }
     return result;
   };
 
   // Drop first n elements from an array and return the rest
   jii.dropFirst = function(obj, number) {
-    if (number <= 0) throw new Error('number should be positive');
+    if (number <= 0) error('dropFirst', 'number should be positive');
     switch (toString.call(obj)) {
       case objString: return stringProto.slice.call(obj, number); break;
       case objArray: return arrayProto.slice.call(obj, number); break;
@@ -709,6 +729,20 @@
       }
     })();
     return sleep;
+  };
+
+  jii.time = function(func, args, logger, context) {
+    context = context || func;
+    logger = logger || false;
+    var startTime = new Date().getTime();
+    var result = func.call(context, args);
+    if (!logger) {
+//      console.log('"jii.time" result: ' + result);
+      console.log('"jii.time" time: ' + (new Date().getTime() - startTime));
+    } else {
+//      logger('"jii.time" result ' + result);
+      logger('"jii.time" time: ' + (new Date().getTime() - startTime));
+    }
   };
 
   // -------------------- SYSTEM --------------------
