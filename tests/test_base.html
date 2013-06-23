@@ -333,6 +333,14 @@
       });
     });
 
+    describe('jii.select aka jii.filter', function() {
+      it('should filter all positive values', function() {
+        expect(jii.select([2, 3, -4, -2, 0, -3, 7], function(x) {
+          return x > 0;
+        })).toEqual([2, 3, 7]);
+      });
+    });
+
     (function() {
       var jasmineEnv = jasmine.getEnv();
       jasmineEnv.updateInterval = 250;
