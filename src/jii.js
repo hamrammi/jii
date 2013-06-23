@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.6.2';
+  var VERSION = '0.6.3';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -497,6 +497,21 @@
       var slices = jii.eachCons(array, length, true);
       jii.forEach(slices, permutation);
     }
+    return result;
+  };
+
+  // Combinations
+  jii.combinations = function(options) {
+    var result = [];
+    var combination = function(options, stack) {
+      if (!options.length) result.push(stack);
+      else {
+        for (var i = 0, l = options[0].length; i < l; i++) {
+          combination(options.slice(1), stack.concat(options[0][i]));
+        }
+      }
+    };
+    combination(options, []);
     return result;
   };
 
