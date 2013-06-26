@@ -339,6 +339,137 @@
           return x > 0;
         })).toEqual([2, 3, 7]);
       });
+      it('should retrieve all work with length equal to 4', function() {
+        expect(jii.select(['foo', 'milk', 'massive', 'word'], function(x) {
+          return x.length === 4;
+        })).toEqual(['milk', 'word']);
+      });
+    });
+
+    describe('jii.reject', function() {
+      it('should reject all positive values', function() {
+        expect(jii.reject([1, 54, -2, 34, -2, -42], function(x) {
+          return x > 0;
+        })).toEqual([-2, -2, -42]);
+      });
+    });
+
+    describe('jii.flatten', function() {
+      it('should flatten simple array', function() {
+        expect(jii.flatten([65, ['foo', 2], 'bar', ['baz', 32], 89])).toEqual(
+            [65, 'foo', 2, 'bar', 'baz', 32, 89]
+        );
+      });
+      it('should flatten more complicated array', function() {
+        expect(jii.flatten([[45, 2, [23, 21]], [[[[324]]], 90, [123, [[234]]], 2]])).toEqual(
+            [45, 2, 23, 21, 324, 90, 123, 234, 2]
+        );
+      });
+      it('should flatten more complicated array with depth 2', function() {
+        expect(jii.flatten([[45, 2, [23, 21]], [[[[324]]], 90, [123, [[234]]], 2]], 2)).toEqual(
+            [45, 2, 23, 21, [[ 324 ]], 90, 123, [234], 2]
+        );
+      });
+    });
+
+    describe('jii.reduce', function() {
+      it('should reduce a simple array', function() {
+        var iterator = function(sum, chr) {
+          return sum * chr + 4;
+        };
+        expect(jii.reduce([1, 2, 3, 4], iterator)).toEqual(92);
+      });
+      it('should reduce a simple array with initial value of 90', function() {
+        var iterator = function(sum, chr) {
+          return sum * chr + 4;
+        };
+        expect(jii.reduce([1, 2, 3, 4], iterator, 90)).toEqual(2324);
+      });
+      it('should reduce a simple array of word with initial value of "hello!"', function() {
+        var iterator = function(string, chr) {
+          return string + '_' + chr;
+        };
+        expect(jii.reduce(['i', 'am', 'reduce'], iterator, 'hello!')).toEqual(
+            'hello!_i_am_reduce'
+        );
+      });
+      it('should reduce a simple array of word with initial value of "hello!" and context', function() {
+        var ctx = { 'append': function(to, what) { return to + '_' + what; } };
+        var iterator = function(string, chr) {
+          return this.append(string, chr);
+        };
+        expect(jii.reduce(['i', 'am', 'reduce'], iterator, 'hello!', ctx)).toEqual(
+            'hello!_i_am_reduce'
+        );
+      });
+    });
+
+    describe('jii.sum', function() {
+      it('should return summary of all elements', function() {
+        expect(jii.sum([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toEqual(55);
+      });
+    });
+
+    describe('jii.multiply', function() {
+      it('should return multiplication of all elements', function() {
+        expect(jii.multiply([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toEqual(3628800);
+      });
+    });
+
+    describe('jii.all aka jii.every', function() {
+      it('should return `true` if all elements are greater that 0', function() {
+        expect(jii.every([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function(x) {
+          return x > 0;
+        })).toEqual(true);
+      });
+      it('should return `true` if all elements are type of `string`', function() {
+        expect(jii.every(['this', 'must', 'not', 'fail'], function(w) {
+          return jii.isString(w);
+        })).toEqual(true);
+      });
+      it('should return `false` if not all elements are type of `string`', function() {
+        expect(jii.every(['this', 'must', 0, 'fail'], function(w) {
+          return jii.isString(w);
+        })).toEqual(false);
+        expect(jii.every(['this', 'must', 'not', 'fail'], function(w) {
+          return jii.isString(w);
+        })).not.toEqual(false);
+      });
+      it('should return `true` if all of array elements are less than 0 and context is passed', function() {
+        var ctx = { 'compare': function(x) { return x < 0; } };
+        var fctx = function() {};
+        fctx.prototype.compare = function(x) { return x < 0; };
+        expect(jii.all([-7, -23, -23, -67, -3, -3, -33], function(x) {
+          return this.compare(x);
+        }, ctx)).toEqual(true);
+        expect(jii.all([-7, -23, -23, -67, -3, -3, -33], function(x) {
+          return this.compare(x);
+        }, new fctx())).toEqual(true);
+      });
+    });
+
+    describe('jii.any aka jii.some', function() {
+      it('should return `true` if any of array elements is greater than 0', function() {
+        expect(jii.some([-7, -23, -23, -67, 3, -3, -33], function(x) {
+          return x > 0;
+        })).toEqual(true);
+      });
+      it('should return `false` if none of array elements is greater than 0', function() {
+        expect(jii.some([-7, -23, -23, -67, -43, -3, -33], function(x) {
+          return x > 0;
+        })).toEqual(false);
+      });
+      it('should return `true` if any of array elements is greater than 0 and context is passed', function() {
+        var ctx = { 'compare': function(x) { return x > 0; } };
+        var fctx = function() {};
+        fctx.compare = function(x) { return x > 0; };
+        expect(jii.some([-7, -23, -23, -67, 3, -3, -33], function(x) {
+          return this.compare(x);
+        }, ctx)).toEqual(true);
+        expect(jii.some([-7, -23, -23, -67, 3, -3, -33], function(x) {
+          return this.compare(x);
+        }, fctx)).toEqual(true);
+      });
     });
 
     (function() {
