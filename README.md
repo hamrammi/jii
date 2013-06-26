@@ -1,5 +1,5 @@
-#jii.js - JavaScript's library that adds some awesome sugar with Ruby and Python flavour
-________________________________________________________________________________________
+##jii.js - functional javascript library with Ruby and Python flavour
+_____________________________________________________________________
 
 *Documentation is coming soon. (Site is under work now)*
 
@@ -8,7 +8,6 @@ Growing library that adds some helpful methods for your pleasure.
 
 ###Milestone:
 - Add much more methods to make functional programming better
-- Find and fix bugs
 - Make stable release as soon as possible
 
 ####Some examples:
@@ -28,10 +27,10 @@ jii.flatten([-1, [2, [[3, 2, 1, [['a', [[function() {}, ['c', 4, [[false, [['c',
 Emulates "class system". Makes work with OOP in JavaScript much better.
 
 ###Milestone:
-- Private members and variables (is it possible?)
+- Private members and variables (is it possible? I think not :()
 - Correct constructor property
 
-####Examples:
+####Example:
 ```javascript
 var Parent = Class.create({
   init: function(name) {
@@ -50,20 +49,19 @@ var homer = new Parent('Homer Simpson');
 var bart = new Child('Bart Simpson');
 homer.sayHello(); // Homer Simpson says hello
 bart.sayGoodBye(); // Bart Simpson says goodbye
-homer.sayHello(); // throws an error
+homer.sayGoodbye(); // throws an error
 ```
 
 ##jii.highlighter.js
-Simple tool to highlight code snippets
+Simple tool to highlight code snippets.
 
 ###Milestone:
 - Extend syntax
-- Correct comment tags (make work this: "'flkd\'dkfdl\'df fd'")
-- Search for bugs and fix them
+- Correct comment tags (this should work: "'flkd\'dkfdl\'df fd'")
 - Add some themes
 
 To use it just `jii.highlighter(document.getElementsByTagName('pre'), {});`
-You can also pass any CSS param as second argument.
+You can also pass any CSS param(s) as a second argument.
 
 ####Example:
 ```javascript
