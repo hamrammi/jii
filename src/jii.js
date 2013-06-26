@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.6.3';
+  var VERSION = '0.6.4';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -417,7 +417,7 @@
   // Core reduce functionality
   jii.reduce = function(array, iterator, initialValue, context) {
     if (!isArray(array)) typeError('array', typeof array, 'reduce');
-    if (arrayProto.reduce) {
+    if (arrayProto.reduce && !context) {
       if (!initialValue) return array.reduce(iterator);
       else return array.reduce(iterator, initialValue);
     }
@@ -428,7 +428,7 @@
       else { value = el; isValueSet = true; }
     };
     jii.each(array, reduce);
-    if (!value) throw new Error('Reduce of empty array with no initial value');
+    if (!value) error('reduce', 'reduce of empty array with no initial value');
     return value;
   };
 
