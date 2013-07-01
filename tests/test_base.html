@@ -214,13 +214,14 @@
                   [[[[[[[[[1, [[[true, [[, function() { return true; }, [[[[[[[], undefined]]]]]], 'u']]]]]]]]]]]]]]
                 ]
               },
-              true,
+              this,
               [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
-              this
+              true
             ]
         )).toBe(true);
         expect(jii.similar(
             [
+              [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
               { a: 'foo', m: { null: undefined },
                 b: function() {},
                 c: [
@@ -229,7 +230,6 @@
                 ]
               },
               true,
-              [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
               this
             ],
             [
@@ -471,6 +471,106 @@
         }, fctx)).toEqual(true);
       });
     });
+
+    describe('jii.permutations', function() {
+      it('should return all possible permutations', function() {
+        expect(jii.permutations([1, 2, 3, 4])).toEqual(
+            [ [ 1, 2, 3, 4 ], [ 1, 2, 4, 3 ], [ 1, 3, 2, 4 ], [ 1, 3, 4, 2 ], [ 1, 4, 2, 3 ], [ 1, 4, 3, 2 ],
+              [ 2, 1, 3, 4 ], [ 2, 1, 4, 3 ], [ 2, 3, 1, 4 ], [ 2, 3, 4, 1 ], [ 2, 4, 1, 3 ], [ 2, 4, 3, 1 ],
+              [ 3, 1, 2, 4 ], [ 3, 1, 4, 2 ], [ 3, 2, 1, 4 ], [ 3, 2, 4, 1 ], [ 3, 4, 1, 2 ], [ 3, 4, 2, 1 ],
+              [ 4, 1, 2, 3 ], [ 4, 1, 3, 2 ], [ 4, 2, 1, 3 ], [ 4, 2, 3, 1 ], [ 4, 3, 1, 2 ], [ 4, 3, 2, 1 ] ]
+        );
+      });
+      it('should return all possible permutations with given length', function() {
+        expect(jii.permutations([1, 2, 3, 4], 3)).toEqual(
+            [ [ 1, 2, 3 ], [ 1, 3, 2 ], [ 2, 1, 3 ], [ 2, 3, 1 ], [ 3, 1, 2 ], [ 3, 2, 1 ],
+              [ 2, 3, 4 ], [ 2, 4, 3 ], [ 3, 2, 4 ], [ 3, 4, 2 ], [ 4, 2, 3 ], [ 4, 3, 2 ],
+              [ 3, 4, 1 ], [ 3, 1, 4 ], [ 4, 3, 1 ], [ 4, 1, 3 ], [ 1, 3, 4 ], [ 1, 4, 3 ],
+              [ 4, 1, 2 ], [ 4, 2, 1 ], [ 1, 4, 2 ], [ 1, 2, 4 ], [ 2, 4, 1 ], [ 2, 1, 4 ] ]
+        );
+      });
+    });
+
+    describe('jii.combinations', function() {
+      it('should return all possible combinations', function() {
+        var a = ['red', 'green', 'blue', 'yellow'],
+            b = ['big', 'middle', 'small'],
+            c = ['up', 'down'];
+        expect(jii.combinations([a, b, c])).toEqual(
+            [ [ 'red', 'big', 'up' ], [ 'red', 'big', 'down' ], [ 'red', 'middle', 'up' ],
+              [ 'red', 'middle', 'down' ], [ 'red', 'small', 'up' ], [ 'red', 'small', 'down' ],
+              [ 'green', 'big', 'up' ], [ 'green', 'big', 'down' ], [ 'green', 'middle', 'up' ],
+              [ 'green', 'middle', 'down' ], [ 'green', 'small', 'up' ], [ 'green', 'small', 'down' ],
+              [ 'blue', 'big', 'up' ], [ 'blue', 'big', 'down' ], [ 'blue', 'middle', 'up' ],
+              [ 'blue', 'middle', 'down' ], [ 'blue', 'small', 'up' ], [ 'blue', 'small', 'down' ],
+              [ 'yellow', 'big', 'up' ], [ 'yellow', 'big', 'down' ], [ 'yellow', 'middle', 'up' ],
+              [ 'yellow', 'middle', 'down' ], [ 'yellow', 'small', 'up' ], [ 'yellow', 'small', 'down' ] ]
+        );
+      });
+    });
+
+    describe('jii.size', function() {
+      it('should return number of elements of the `object`', function() {
+        var obj = {};
+        expect(jii.size(obj)).toEqual(0);
+        var obj2 = {
+          'key1': function() {},
+          'key2': true,
+          'key3': 'string',
+          'key4': { 'subkey1': 34 }
+        };
+        expect(jii.size(obj2)).toEqual(4);
+      });
+    });
+
+    describe('jii.occurrences', function() {
+      it('should return number of occurrences of letter `a` in the string `abrahadabra`', function() {
+        expect(jii.occurrences('abrahadabra', 'a')).toEqual(5);
+      });
+      it('should return hash of occurrences of each symbol in the string given', function() {
+        expect(jii.occurrences('Dol Guldur')).toEqual({
+          'D': 1, 'o': 1, 'l': 2, 'G': 1, 'u': 2, 'd': 1, 'r': 1, ' ': 1
+        });
+      });
+    });
+
+    describe('jii.uniq', function() {
+      it('should remove duplicates from an array', function() {
+        expect(jii.uniq(
+            ['duplicate', 'not', 'another', 'duplicate', 4, 32, '4', 32]
+        )).toEqual(['duplicate', 'not', 'another', 4, 32, '4']);
+      });
+      it('should remove duplicates from a compicated array', function() {
+        var s = [ [{a: { f: undefined, m: null, g: 'foobar' }}, [[[[]], 'missing']]],
+          { a: 'foo', m: { null: undefined },
+//              b: function() {},
+            c: [
+              { b: 'b' },
+              [1, 2, [[[[4]]]]]
+            ]
+          },
+          true
+        ];
+        var a = [
+//          function(a) { return a * 23; },
+          ['first', { k1: {k2: {k3: true}} }],
+          { k: 'v', k2: { k3: { k4: [true, false] }, k5: [{ k6: 44 }] } },
+          ['first', { k1: {k2: {k3: true}} }],
+          { k: 'v', k2: { k3: { k4: [true, false] }, k5: [{ k6: 44 }] } },
+          { k: 'v', k2: { k3: { k4: [true, true] }, k5: [{ k6: 44 }] } },
+          s, s
+        ];
+        expect(jii.uniq(a)).toEqual([
+//          function(a) { return a * 23; },
+          ['first', { k1: {k2: {k3: true}} }],
+          { k: 'v', k2: { k3: { k4: [true, false] }, k5: [{ k6: 44 }] } },
+          { k: 'v', k2: { k3: { k4: [true, true] }, k5: [{ k6: 44 }] } },
+          s
+        ]);
+      });
+    });
+
+
 
     (function() {
       var jasmineEnv = jasmine.getEnv();
