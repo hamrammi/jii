@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.6.4';
+  var VERSION = '0.6.5';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -461,7 +461,7 @@
     return value;
   };
 
-  // Test if any elements of an array match criteria
+  // Test if any element of an array matches criteria
   jii.any = jii.some = function(array, comparator, context) {
     if (!isArray(array)) typeError('array', typeof array, 'any(some)');
     if (arrayProto.some) {
@@ -491,9 +491,8 @@
         permutation(slice); slice.splice(i, 0, chr); perm.pop();
       }
     };
-    if (length === l) {
-      permutation(array);
-    } else {
+    if (length === l) permutation(array);
+    else {
       var slices = jii.eachCons(array, length, true);
       jii.forEach(slices, permutation);
     }
@@ -528,7 +527,7 @@
 
   // -------------------- MISC --------------------
 
-  // Split obj into characters and count occurrence of each one
+  // Split obj into characters and count occurrences of each one
   jii.occurrences = function(obj, chr) {
     chr = chr || null;
     obj = isStringOrArray('occurrences', obj);
@@ -565,8 +564,10 @@
       if (uniqCriteria) criteria = jii.uniq(criteria);
       jii.each(criteria, __);
     };
+    var stringCount = function(chr) { if (chr === criteria) result++; };
     if (isRegExp(criteria)) jii.each(obj, regExpCount);
     if (isArray(criteria)) jii.each(obj, arrayCount);
+    if (isString(criteria)) jii.each(obj, stringCount);
     return result;
   };
 
