@@ -3,8 +3,8 @@
  *
  * Helper library that highlights code
  *
- * @version: 0.1.1 (last update: 31.03.2013)
- * @author: hamrammi@gmail.com
+ * @version 0.1.1 (last update: 31.03.2013)
+ * @author hamrammi@gmail.com
  */
 (function() {
   var root = this;
@@ -58,6 +58,13 @@
       return result.join('\n');
     };
 
+    // Helper function to convert foo-bar(foo_bar, foo bar) into fooBar
+    var toCamelCase = function(string) {
+      'use strict';
+      var toUpperCase = function(match, $1) { return $1.toUpperCase(); };
+      return string.replace(/\s/g, '').replace(/[-_](\w)/g, toUpperCase);
+    };
+
     // Finally, colorize the code
     var colorize = function(el, source) {
       source = source.replace(/\[\[span]]/g, '</span>');
@@ -78,7 +85,7 @@
       // Beautify code with user defined CSS styles
       for (var cssProperty in params) {
         if (params.hasOwnProperty(cssProperty)) {
-          el.style[cssProperty] = params[cssProperty];
+          el.style[toCamelCase(cssProperty)] = params[cssProperty];
         }
       }
     };
