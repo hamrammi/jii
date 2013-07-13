@@ -157,6 +157,12 @@
     });
   };
 
+  // Convert string to camelCase
+  jii.toCamelCase = function(string) {
+    var toUpperCase = function(match, $1) { return $1.toUpperCase(); };
+    return string.replace(/\s/g, '').replace(/[-_](\w)/g, toUpperCase);
+  };
+
   // Checks whether last character of string equals to lastChar
   jii.endsWith = function(string, value, caseInsensitive) {
     string = validateType('endsWith', string, 'string');
