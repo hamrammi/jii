@@ -876,6 +876,24 @@
       });
     });
 
+    describe('jii.succ', function() {
+      var arr = ['abc', 4, 'foo', [4, [5, 'o'], 'bc'], 65];
+      it('should return new array consisting of values whose char codes are greater by one to those in source array', function() {
+        expect(jii.succ(44)).toEqual(45);
+        expect(jii.succ('abc')).toEqual('bcd');
+        expect(jii.succ(arr)).toEqual(["bcd", 5, "gpp", [5, [6, 'p'], 'cd'], 66]);
+      });
+    });
+
+    describe('jii.pred', function() {
+      var arr = ['abc', 4, 'foo', [4, [5, 'o'], 'bc'], 65];
+      it('should return new array consisting of values whose char codes are greater by one to those in source array', function() {
+        expect(jii.pred(44)).toEqual(43);
+        expect(jii.pred('abc')).toEqual('`ab');
+        expect(jii.pred(arr)).toEqual(["`ab", 3, "enn", [3, [4, 'n'], 'ab'], 64]);
+      });
+    });
+
     (function() {
       var jasmineEnv = jasmine.getEnv();
       jasmineEnv.updateInterval = 250;
