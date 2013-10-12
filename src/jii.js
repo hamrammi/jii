@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.6.6';
+  var VERSION = '0.7.0';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -87,9 +87,7 @@
     return arg;
   };
 
-  // Make sure an `obj` has `length` property
-  // e.g.: string, array
-  var isStringOrArray = function(func, obj) {
+  var isIterable = function(func, obj) {
     var type = toString.call(obj);
     switch (type) {
       case objString: break;
@@ -232,12 +230,26 @@
     return positions;
   };
 
-  // Reverse string
-  jii.reverse = function(string) {
-    string = validateType('reverse', string, 'string');
-    var reversed = '', i, l = string.length - 1;
-    for (i = 0; i <= l; i++) {
-      reversed += string.charAt(l - i);
+  // Reverses iterable object
+  jii.reverse = function(iterable) {
+    iterable = isIterable('reverse', iterable);
+    var reversed;
+    var type = toString.call(iterable);
+    switch (type) {
+      case objArray:
+        if (jii.isFunction(arrayProto.reverse)) {
+          reversed = iterable.reverse();
+        }
+        //TODO: if not native reverse
+        break;
+      case objString:
+        reversed = '';
+        var i, l = iterable.length - 1;
+        for (i = 0; i <= l; i++) {
+          reversed += iterable.charAt(l - i);
+        }
+        break;
+      default: return typeError('iterable', type, 'reverse');
     }
     return reversed;
   };
@@ -346,7 +358,7 @@
   // Maps each value of `obj` with `iterator` function
   jii.map = function(obj, iterator, context) {
     var result = [];
-    if (obj == null) { return result; }
+    if (obj === null) { return result; }
     // Delegate to `ECMAScript 5` native `map` if available
     if (arrayProto.map) {
       if (isString(obj)) {
@@ -426,24 +438,25 @@
   };
 
   // Core reduce functionality
-  jii.reduce = function(array, iterator, initialValue, context) {
-    if (!isArray(array)) { typeError('array', typeof array, 'reduce'); }
-//    if (arrayProto.reduce && !context) {
-//      if (!initialValue) { return array.reduce(iterator); }
-//      return array.reduce(iterator, initialValue);
-//    }
-    var value, isValueSet = !!initialValue;
-    if (initialValue === 0) { isValueSet = !isValueSet; }
-    if (isValueSet) { value = initialValue; }
+  jii.reduce = function(iterable, iterator, initial, context) {
+    iterable = isIterable('reduce', iterable);
+    var value, isValueSet = !!initial;
+    if (initial === 0) { isValueSet = !isValueSet; }
+    if (isValueSet) { value = initial; }
     var reduce = function(el, index, arr) {
       if (isValueSet) { value = iterator.call(context, value, el, index, arr); }
       else { value = el; isValueSet = true; }
     };
-    jii.each(array, reduce);
+    jii.each(iterable, reduce);
     if (!isValueSet) {
       error('reduce', 'reduce of empty array with no initial value');
     }
     return value;
+  };
+
+  jii.reduceRight = function(iterable, iterator, initial, context) {
+    iterable = isIterable('reduceRight', iterable);
+    return jii.reduce(jii.reverse(iterable), iterator, initial, context);
   };
 
   // Summarize all elements of the array
@@ -530,6 +543,23 @@
     return result;
   };
 
+  // Quickly sort arrays
+  jii.quicksort = function(obj) {
+    var quicksort = function(obj) {
+      if (!obj.length) { return []; }
+      var pivot = obj[0];
+      var smallerOrEqual = [], larger = [];
+      var sort = function(el) {
+        if (el <= pivot) { smallerOrEqual.push(el); } else { larger.push(el); }
+      };
+      jii.each(obj.slice(1), sort);
+      var left = smallerOrEqual.length ? quicksort(smallerOrEqual) : [];
+      var right = larger.length ? quicksort(larger) : [];
+      return left.concat(pivot).concat(right);
+    };
+    return quicksort(obj);
+  };
+
   // ------------------ OBJECTS -------------------
 
   // Returns the length (size) of an object
@@ -546,7 +576,7 @@
   // Split obj into characters and count occurrences of each one
   jii.occurrences = function(obj, chr) {
     chr = chr || null;
-    obj = isStringOrArray('occurrences', obj);
+    obj = isIterable('occurrences', obj);
     var dict = {}, i, l;
     for (i = 0, l = obj.length; i < l; i++) {
       dict[obj[i]] = dict[obj[i]] ? dict[obj[i]] + 1 : 1;
@@ -590,7 +620,7 @@
 
   // Retrieve each `slice` elements from an `obj`
   jii.eachSlice = function(obj, slice) {
-    obj = isStringOrArray('eachSlice', obj);
+    obj = isIterable('eachSlice', obj);
     var result = [], length = obj.length, index = 0;
     var count = Math.floor(length / slice) + 1;
     if (slice <= 0) { error('eachSlice', 'number should be positive'); }
@@ -605,7 +635,7 @@
   // Similar to jii.eachSlice() method but with some changes:
   // jii.eachCons([1, 2, 3, 4, 5]) => [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
   jii.eachCons = function(obj, slice, more) {
-    obj = isStringOrArray('eachCons', obj);
+    obj = isIterable('eachCons', obj);
     var result = [], length = obj.length, index = 0;
     if (slice <= 0) { error('eachCons', 'number should be positive'); }
     if (slice > length) { slice = length; }
@@ -711,6 +741,7 @@
           for (i = 0; i < l; i++) {
             if (has) { break; }
             if (deepScan) {
+              // TODO: maybe use inner global variable instead of `deepScan` arg
               if (isObject(obj[i]) && jii.has(obj[i], chr, deepScan)) {
                 has = true;
               }
@@ -764,6 +795,41 @@
       case objArray:
         result = jii.map(obj, mutator, context); break;
       default: typeError('string or array', typeof obj, 'walk');
+    }
+    return result;
+  };
+
+//  // TODO: compares objects
+//  /**
+//   * Compares objects in Haskell fashion.
+//   * Example:
+//   *   given
+//   *   a = [3, 4, 2]
+//   *   b = [3, 4, 3]
+//   *
+//   * @param a
+//   * @param b
+//   */
+//  // TODO: вынести в отдельную внутренную функцию и юзать её
+//  jii.isLessThan = function(a, b) {};
+//  jii.isGreaterThan = function(a, b) {};
+//
+//  jii.succ = function(obj) {
+//    var type = toString.call(obj);
+//    switch (type) {
+//      case objString:
+//        return '\\u' + parseInt(obj.charCodeAt(0) + 1, 16);
+//    }
+//  };
+
+  // Replicate takes an Int and a value,
+  // and returns a list that has several repetitions of that value (namely,
+  // however many the Int specifies).
+  // For instance, replicate 3 5 returns a list of three fives: [5,5,5]
+  jii.replicate = function(num, obj) {
+    var result = [];
+    while (num--) {
+      result.push(obj);
     }
     return result;
   };
