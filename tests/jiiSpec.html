@@ -161,10 +161,12 @@
     });
 
     describe('jii.reverse', function() {
-      it('should return reversed string', function() {
+      it('should return reversed iterable', function() {
         expect(jii.reverse('Morgoth')).toBe('htogroM');
         expect(jii.reverse('MorgoTh')).toBe('hTogroM');
         expect(jii.reverse('MoRgoTh')).toBe('hTogRoM');
+        expect(jii.reverse([1, 2, 3, 4])).toEqual([4, 3, 2, 1]);
+        expect(jii.reverse([1, 'str', false, { a: undefined }])).toEqual([{ a: undefined }, false, 'str', 1]);
       });
     });
 
@@ -397,7 +399,7 @@
         };
         expect(jii.reduce([1, 2, 3, 4], iterator, 90)).toEqual(2324);
       });
-      it('should reduce a simple array of word with initial value of "hello!"', function() {
+      it('should reduce a simple array of words with initial value of "hello!"', function() {
         var iterator = function(string, chr) {
           return string + '_' + chr;
         };
@@ -405,7 +407,7 @@
             'hello!_i_am_reduce'
         );
       });
-      it('should reduce a simple array of word with initial value of "hello!" and context', function() {
+      it('should reduce a simple array of words with initial value of "hello!" and context', function() {
         var ctx = { 'append': function(to, what) { return to + '_' + what; } };
         var iterator = function(string, chr) {
           return this.append(string, chr);
@@ -413,6 +415,62 @@
         expect(jii.reduce(['i', 'am', 'reduce'], iterator, 'hello!', ctx)).toEqual(
             'hello!_i_am_reduce'
         );
+      });
+      it('should return `0` since initial value is string `0` and body of reducing function looks like this `return a * b`', function() {
+        var iterator = function(a, b) { return a * b; };
+        expect(jii.reduce([1, 2, 3, 4], iterator, '0')).toEqual(0);
+      });
+      it('should return `0` since initial value is `0` and body of reducing function looks like this `return a * b`', function() {
+        var iterator = function(a, b) { return a * b; };
+        expect(jii.reduce([1, 2, 3, 4], iterator, 0)).toEqual(0);
+      });
+      it('should flatten an array of arrays', function() {
+        var _concat = function(a, b) { return a.concat(b); };
+        expect(jii.reduce([[1, 2], [3, 4], [5, 6]], _concat)).toEqual([1, 2, 3, 4, 5, 6]);
+      });
+    });
+
+    describe('jii.reduceRight', function() {
+      it('should reduceRight a simple array', function() {
+        var iterator = function(sum, chr) {
+          return sum * chr + 4;
+        };
+        expect(jii.reduceRight([1, 2, 3, 4], iterator)).toEqual(40);
+      });
+      it('should reduceRight a simple array with initial value of 90', function() {
+        var iterator = function(sum, chr) {
+          return sum * chr + 4;
+        };
+        expect(jii.reduceRight([1, 2, 3, 4], iterator, 90)).toEqual(2200);
+      });
+      it('should reduceRight a simple array of words with initial value of "hello!"', function() {
+        var iterator = function(string, chr) {
+          return string + '__' + chr;
+        };
+        expect(jii.reduceRight(['am', 'I', 'Master Joda'], iterator, 'hello!')).toEqual(
+            'hello!__Master Joda__I__am'
+        );
+      });
+      it('should reduceRight a simple array of words with initial value of "hello!" and context', function() {
+        var ctx = { 'append': function(to, what) { return to + '>_<' + what; } };
+        var iterator = function(string, chr) {
+          return this.append(string, chr);
+        };
+        expect(jii.reduceRight(['am', 'I', 'Master Joda'], iterator, 'hello!', ctx)).toEqual(
+            'hello!>_<Master Joda>_<I>_<am'
+        );
+      });
+      it('should return `0` since initial value is string `0` and body of reducing function looks like this `return a * b`', function() {
+        var iterator = function(a, b) { return a * b; };
+        expect(jii.reduceRight([1, 2, 3, 4], iterator, '0')).toEqual(0);
+      });
+      it('should return `0` since initial value is `0` and body of reducing function looks like this `return a * b`', function() {
+        var iterator = function(a, b) { return a * b; };
+        expect(jii.reduceRight([1, 2, 3, 4], iterator, 0)).toEqual(0);
+      });
+      it('should flatten an array of arrays', function() {
+        var _concat = function(a, b) { return a.concat(b); };
+        expect(jii.reduceRight([[1, 2], [3, 4], [5, 6]], _concat)).toEqual([5, 6, 3, 4, 1, 2]);
       });
     });
 
@@ -793,6 +851,28 @@
           this
         ])).toBe(false);
         expect(jii.isEqual(s, 'This is  very long string')).toBe(false);
+      });
+    });
+
+    describe('jii.quicksort', function() {
+      var arr = [10,2,5,3,1,6,7,4,2,3,4,8,9];
+      it('should sort values of array in ascending order', function() {
+        expect(jii.quicksort(arr)).toEqual([1,2,2,3,3,4,4,5,6,7,8,9,10]);
+      });
+    });
+
+    describe('jii.replicate', function() {
+      var obj = {
+        a: 'foo',
+        b: [false, true, undefined, 4],
+        c: { a: 'bar', b: { 'baz': 'quux' } }
+      };
+      it('should return array consisting of N same values', function() {
+        expect(jii.replicate(4, 'foo')).toEqual(['foo', 'foo', 'foo', 'foo']);
+        expect(jii.replicate(5, 43)).toEqual([43, 43, 43, 43, 43]);
+        expect(jii.replicate(4, true)).toEqual([true, true, true, true]);
+        expect(jii.replicate(2, obj)).toEqual([obj, obj]);
+        expect(jii.replicate(4, [])).toEqual([[], [], [], []]);
       });
     });
 
