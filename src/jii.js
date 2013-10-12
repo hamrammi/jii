@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.7.0';
+  var VERSION = '0.7.2';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -799,28 +799,55 @@
     return result;
   };
 
-//  // TODO: compares objects
-//  /**
-//   * Compares objects in Haskell fashion.
-//   * Example:
-//   *   given
-//   *   a = [3, 4, 2]
-//   *   b = [3, 4, 3]
-//   *
-//   * @param a
-//   * @param b
-//   */
-//  // TODO: вынести в отдельную внутренную функцию и юзать её
-//  jii.isLessThan = function(a, b) {};
-//  jii.isGreaterThan = function(a, b) {};
-//
-//  jii.succ = function(obj) {
-//    var type = toString.call(obj);
-//    switch (type) {
-//      case objString:
-//        return '\\u' + parseInt(obj.charCodeAt(0) + 1, 16);
-//    }
-//  };
+  jii.succ = function(obj) {
+    var type = toString.call(obj);
+    var handleString = function(x) {
+      return String.fromCharCode(x.charCodeAt(0) + 1);
+    };
+    var handleArray = function(element) {
+      if (isString(element)) {
+        return jii.map(element, handleString).join('');
+      }
+      if (isNumber(element)) { return element + 1; }
+      if (isArray(element)) { return jii.map(element, handleArray); }
+      return element;
+    };
+    switch (type) {
+      case objString:
+        return jii.map(obj, handleString).join('');
+      case objNumber:
+        return obj + 1;
+      case objArray:
+        return jii.map(obj, handleArray);
+      default:
+        return typeError(['string', 'number', 'array'], obj, 'succ');
+    }
+  };
+
+  jii.pred = function(obj) {
+    var type = toString.call(obj);
+    var handleString = function(x) {
+      return String.fromCharCode(x.charCodeAt(0) - 1);
+    };
+    var handleArray = function(element) {
+      if (isString(element)) {
+        return jii.map(element, handleString).join('');
+      }
+      if (isNumber(element)) { return element - 1; }
+      if (isArray(element)) { return jii.map(element, handleArray); }
+      return element;
+    };
+    switch (type) {
+      case objString:
+        return jii.map(obj, handleString).join('');
+      case objNumber:
+        return obj - 1;
+      case objArray:
+        return jii.map(obj, handleArray);
+      default:
+        return typeError(['string', 'number', 'array'], obj, 'pred');
+    }
+  };
 
   // Replicate takes an Int and a value,
   // and returns a list that has several repetitions of that value (namely,
