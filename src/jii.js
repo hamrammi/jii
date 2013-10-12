@@ -9,7 +9,7 @@
 (function() {
   'use strict';
 
-  var VERSION = '0.7.2';
+  var VERSION = '0.7.3';
   var root = this;
 
   var arrayProto = Array.prototype,
@@ -239,8 +239,13 @@
       case objArray:
         if (jii.isFunction(arrayProto.reverse)) {
           reversed = iterable.reverse();
+        } else {
+          reversed = [];
+          var index = iterable.length;
+          while (--index >= 0) {
+            reversed.push(iterable[index]);
+          }
         }
-        //TODO: if not native reverse
         break;
       case objString:
         reversed = '';
@@ -799,16 +804,22 @@
     return result;
   };
 
-  jii.succ = function(obj) {
+  var succPred = function(obj, sign) {
+    if (!jii.in(sign, ['+', '-'])) {
+      return error('succPred', 'only "+" and "-" are allowed');
+    }
     var type = toString.call(obj);
     var handleString = function(x) {
-      return String.fromCharCode(x.charCodeAt(0) + 1);
+      var code = sign === '+' ? (x.charCodeAt(0) + 1) : (x.charCodeAt(0) - 1);
+      return String.fromCharCode(code);
     };
     var handleArray = function(element) {
       if (isString(element)) {
         return jii.map(element, handleString).join('');
       }
-      if (isNumber(element)) { return element + 1; }
+      if (isNumber(element)) {
+        return sign === '+' ? ++element : --element;
+      }
       if (isArray(element)) { return jii.map(element, handleArray); }
       return element;
     };
@@ -816,37 +827,21 @@
       case objString:
         return jii.map(obj, handleString).join('');
       case objNumber:
-        return obj + 1;
+        return sign === '+' ? ++obj : --obj;
       case objArray:
         return jii.map(obj, handleArray);
       default:
-        return typeError(['string', 'number', 'array'], obj, 'succ');
+        var fn = sign === '+' ? 'succ' : 'pred';
+        return typeError(['string', 'number', 'array'], obj, fn);
     }
   };
 
+  jii.succ = function(obj) {
+    return succPred(obj, '+');
+  };
+
   jii.pred = function(obj) {
-    var type = toString.call(obj);
-    var handleString = function(x) {
-      return String.fromCharCode(x.charCodeAt(0) - 1);
-    };
-    var handleArray = function(element) {
-      if (isString(element)) {
-        return jii.map(element, handleString).join('');
-      }
-      if (isNumber(element)) { return element - 1; }
-      if (isArray(element)) { return jii.map(element, handleArray); }
-      return element;
-    };
-    switch (type) {
-      case objString:
-        return jii.map(obj, handleString).join('');
-      case objNumber:
-        return obj - 1;
-      case objArray:
-        return jii.map(obj, handleArray);
-      default:
-        return typeError(['string', 'number', 'array'], obj, 'pred');
-    }
+    return succPred(obj, '-');
   };
 
   // Replicate takes an Int and a value,
